@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    @apply bg-white text-gray-800 antialiased;
+    font-family: var(--font-inter), sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ========================
+     BOUTONS
+  ======================== */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-green-600 text-white font-medium text-sm hover:bg-green-700 active:bg-green-800 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors duration-150;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium text-sm hover:border-green-500 hover:text-green-600 transition-colors duration-150;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-gray-600 font-medium text-sm hover:bg-gray-100 transition-colors duration-150;
+  }
+
+  /* ========================
+     CARTES
+  ======================== */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200;
+  }
+
+  /* ========================
+     INPUTS
+  ======================== */
+  .input {
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition;
+  }
+
+  .textarea {
+    @apply input min-h-[120px];
+    resize: vertical;
+  }
+
+  /* ========================
+     BADGE
+  ======================== */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold;
+  }
+  .badge-sale {
+    @apply badge bg-red-500 text-white;
+  }
+  .badge-new {
+    @apply badge bg-green-500 text-white;
+  }
+  .badge-bestseller {
+    @apply badge bg-orange-400 text-white;
+  }
+
+  /* ========================
+     CARTE PRODUIT
+  ======================== */
+  .product-card {
+    @apply bg-white border border-gray-200 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300;
+  }
+
+  .product-card__image {
+    @apply relative aspect-square bg-white overflow-hidden;
+  }
+
+  /* ========================
+     SKELETON
+  ======================== */
+  .skeleton {
+    @apply animate-pulse bg-gray-100 rounded-lg;
+  }
+
+  /* ========================
+     CONTAINER
+  ======================== */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* ========================
+     SECTION TITLES
+  ======================== */
+  .section-title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  .section-subtitle {
+    @apply text-gray-500 text-sm mt-1;
+  }
+}

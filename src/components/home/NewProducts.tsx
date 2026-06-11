@@ -1,0 +1,1 @@
+export { NewProducts } from "./HomeComponents";
