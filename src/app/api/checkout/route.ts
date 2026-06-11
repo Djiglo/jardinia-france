@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { createStripeCheckoutSession } from "@/lib/stripe";
 import { auth } from "@/lib/auth";
