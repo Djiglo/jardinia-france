@@ -26,7 +26,7 @@ const EU_COUNTRIES = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const { items, subtotal, coupon, clearCart } = useCartStore();
+  const { items, subtotal, couponCode, discount, clearCart } = useCartStore();
 
   const [step, setStep] = useState<Step>("address");
   const [loading, setLoading] = useState(false);
@@ -39,9 +39,7 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
   const shippingCost = subtotal >= 79 ? 0 : shippingMethod === "express" ? 12.99 : 5.99;
-  const discountAmount = coupon
-    ? coupon.type === "percentage" ? (subtotal * coupon.discount) / 100 : coupon.discount
-    : 0;
+  const discountAmount = discount ?? 0;
   const total = subtotal - discountAmount + shippingCost;
 
   useEffect(() => {
@@ -64,7 +62,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, address, shippingMethod, coupon }),
+        body: JSON.stringify({ items, address, shippingMethod, coupon: couponCode }),
       });
       const { url, error } = await res.json();
       if (error) { toast.error(error); return; }
