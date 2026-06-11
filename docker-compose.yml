@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  # -------------------------------------
+  # PostgreSQL Database
+  # -------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: jardinia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jardinia
+      POSTGRES_PASSWORD: jardinia_password
+      POSTGRES_DB: jardinia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jardinia -d jardinia_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------
+  # Application Next.js
+  # -------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jardinia_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://jardinia:jardinia_password@postgres:5432/jardinia_db
+      NEXTAUTH_URL: http://localhost:3000
+    env_file:
+      - .env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./public/images:/app/public/images
+
+volumes:
+  postgres_data:

@@ -1,0 +1,1 @@
+export { QuickFAQ } from "./HomeComponents";
