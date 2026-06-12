@@ -3,10 +3,7 @@
 // ================================================
 import Link from "next/link";
 import {
-  Facebook,
   Instagram,
-  Youtube,
-  Twitter,
   MapPin,
   Mail,
   ShieldCheck,
@@ -123,11 +120,15 @@ export function Footer() {
 
             {/* Réseaux sociaux */}
             <div className="flex items-center gap-3">
-              {/* Liens réseaux sociaux — à remplacer par les vraies URLs au lancement */}
-              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Facebook"><Facebook size={18} /></span>
-              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Instagram"><Instagram size={18} /></span>
-              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="YouTube"><Youtube size={18} /></span>
-              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Twitter/X"><Twitter size={18} /></span>
+              <a
+                href="https://www.instagram.com/jardiniafrance"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-anthracite-800 rounded-lg hover:bg-primary-600/30 transition-colors"
+                aria-label="Jardinia France sur Instagram"
+              >
+                <Instagram size={18} />
+              </a>
             </div>
 
             {/* Coordonnées */}

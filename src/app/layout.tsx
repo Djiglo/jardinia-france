@@ -106,7 +106,6 @@ export default function RootLayout({
               foundingDate: "2024",
               areaServed: "EU",
               sameAs: [
-                "https://www.facebook.com/jardiniafrance",
                 "https://www.instagram.com/jardiniafrance",
               ],
             }),
