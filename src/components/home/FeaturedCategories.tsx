@@ -4,53 +4,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-const categories = [
-  {
-    name: "Piscines",
-    href: "/boutique/piscines",
-    image: "https://i.ibb.co/WNjdyk4K/8057-011726583-3.jpg",
-    count: "12 produits",
-    emoji: "🏊",
-  },
-  {
-    name: "Mobilier de jardin",
-    href: "/boutique/mobilier-jardin",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
-    count: "28 produits",
-    emoji: "🪑",
-  },
-  {
-    name: "Barbecues",
-    href: "/boutique/barbecues",
-    image: "https://i.ibb.co/RTVRXxpz/1501175-B-rgb-EMEA-1800x1800-06cf445.avif",
-    count: "15 produits",
-    emoji: "🔥",
-  },
-  {
-    name: "Tondeuses & Gazon",
-    href: "/boutique/tondeuses-gazon",
-    image: "https://i.ibb.co/1tFwdBWC/tondeuse-thermique-lc-353v-husqvarna-2.png",
-    count: "18 produits",
-    emoji: "🌿",
-  },
-  {
-    name: "Outils de jardin",
-    href: "/boutique/outils-jardin",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80",
-    count: "22 produits",
-    emoji: "🔧",
-  },
-  {
-    name: "Pergolas",
-    href: "/boutique/pergolas",
-    image: "https://i.ibb.co/W4zK5tbL/KIT-000573-main-image-web-810faa601fa3497eb7396d1b49b47e00-xlarge.jpg",
-    count: "20 produits",
-    emoji: "🏡",
-  },
-];
+const CATEGORY_IMAGES: Record<string, string> = {
+  "piscines":        "https://i.ibb.co/WNjdyk4K/8057-011726583-3.jpg",
+  "mobilier-jardin": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
+  "barbecues":       "https://i.ibb.co/RTVRXxpz/1501175-B-rgb-EMEA-1800x1800-06cf445.avif",
+  "tondeuses-gazon": "https://i.ibb.co/1tFwdBWC/tondeuse-thermique-lc-353v-husqvarna-2.png",
+  "outils-jardin":   "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80",
+  "pergolas":        "https://i.ibb.co/W4zK5tbL/KIT-000573-main-image-web-810faa601fa3497eb7396d1b49b47e00-xlarge.jpg",
+};
 
-export function FeaturedCategories() {
+export async function FeaturedCategories() {
+  const categories = await prisma.category.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+    include: { _count: { select: { products: { where: { isActive: true } } } } },
+  });
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container-custom">
@@ -72,29 +43,34 @@ export function FeaturedCategories() {
 
         {/* Grille catégories */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((cat) => (
-            <Link
-              key={cat.href}
-              href={cat.href}
-              className="group flex flex-col items-center"
-            >
-              <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white shadow-card group-hover:shadow-card-hover transition-all duration-300 mb-3">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <span className="absolute top-3 left-3 text-2xl">{cat.emoji}</span>
-              </div>
-              <h3 className="font-medium text-anthracite-800 text-sm text-center group-hover:text-primary-700 transition-colors">
-                {cat.name}
-              </h3>
-              <span className="text-xs text-gray-400 mt-0.5">{cat.count}</span>
-            </Link>
-          ))}
+          {categories.map((cat) => {
+            const image = CATEGORY_IMAGES[cat.slug] ?? "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80";
+            const count = cat._count.products;
+            return (
+              <Link
+                key={cat.slug}
+                href={`/boutique/${cat.slug}`}
+                className="group flex flex-col items-center"
+              >
+                <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white shadow-card group-hover:shadow-card-hover transition-all duration-300 mb-3">
+                  <Image
+                    src={image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                </div>
+                <h3 className="font-medium text-anthracite-800 text-sm text-center group-hover:text-primary-700 transition-colors">
+                  {cat.name}
+                </h3>
+                <span className="text-xs text-gray-400 mt-0.5">
+                  {count} produit{count !== 1 ? "s" : ""}
+                </span>
+              </Link>
+            );
+          })}
         </div>
 
         {/* Bouton mobile */}
