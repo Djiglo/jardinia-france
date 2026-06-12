@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -6,11 +7,8 @@ import { formatPrice, orderStatusColors, orderStatusLabels } from "@/lib/utils";
 
 export default async function CommandesPage() {
   const session = await auth();
-  if (!session?.user?.id) {
-    const { redirect } = await import("next/navigation");
-    redirect("/auth/connexion?callbackUrl=/compte/commandes");
-  }
-  const userId = session.user.id!;
+  if (!session?.user?.id) redirect("/auth/connexion?callbackUrl=/compte/commandes");
+  const userId = session.user.id;
 
   const orders = await prisma.order.findMany({
     where: { userId },

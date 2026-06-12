@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -21,10 +21,7 @@ export default async function OrderDetailPage({ params }: Props) {
     },
   });
 
-  if (!session?.user?.id) {
-    const { redirect } = await import("next/navigation");
-    redirect(`/auth/connexion?callbackUrl=/compte/commandes/${id}`);
-  }
+  if (!session?.user?.id) redirect(`/auth/connexion?callbackUrl=/compte/commandes/${id}`);
   if (!order || order.userId !== session.user.id) notFound();
 
   const address = order.shippingAddress as any;

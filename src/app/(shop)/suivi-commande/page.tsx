@@ -122,7 +122,7 @@ export default function SuiviCommandePage() {
                     <div className="space-y-2">
                       {order.items.map((item: any) => (
                         <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-gray-600">{item.productName} × {item.quantity}</span>
+                          <span className="text-gray-600">{item.name} × {item.quantity}</span>
                           <span className="font-medium text-anthracite-700">{Number(item.total).toFixed(2)} €</span>
                         </div>
                       ))}

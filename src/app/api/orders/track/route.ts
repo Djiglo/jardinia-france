@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       user: { select: { email: true } },
       shippingAddress: true,
       items: {
-        select: { id: true, productName: true, quantity: true, unitPrice: true, total: true },
+        select: { id: true, name: true, quantity: true, price: true, total: true },
       },
     },
   });
