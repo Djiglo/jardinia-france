@@ -6,11 +6,11 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
-const FEATURED_SLUGS = ["piscines", "barbecues", "tondeuses-gazon", "mobilier-jardin", "outils-jardin", "pergolas"];
+const FEATURED_SLUGS = ["piscines", "barbecues", "tondeuses-gazon", "mobilier-jardin", "pergolas", "outils-jardin"];
 
 const CATEGORY_IMAGES: Record<string, string> = {
   "piscines":        "https://i.ibb.co/WNjdyk4K/8057-011726583-3.jpg",
-  "mobilier-jardin": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
+  "mobilier-jardin": "https://i.ibb.co/XxZYhGYb/00-W074391-A.avif",
   "barbecues":       "https://i.ibb.co/RTVRXxpz/1501175-B-rgb-EMEA-1800x1800-06cf445.avif",
   "tondeuses-gazon": "https://i.ibb.co/1tFwdBWC/tondeuse-thermique-lc-353v-husqvarna-2.png",
   "outils-jardin":   "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80",
