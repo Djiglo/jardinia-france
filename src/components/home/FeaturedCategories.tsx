@@ -9,7 +9,7 @@ const categories = [
   {
     name: "Piscines",
     href: "/boutique/piscines",
-    image: "https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=500&q=80",
+    image: "https://i.ibb.co/WNjdyk4K/8057-011726583-3.jpg",
     count: "12 produits",
     emoji: "🏊",
   },
@@ -23,14 +23,14 @@ const categories = [
   {
     name: "Barbecues",
     href: "/boutique/barbecues",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80",
+    image: "https://i.ibb.co/RTVRXxpz/1501175-B-rgb-EMEA-1800x1800-06cf445.avif",
     count: "15 produits",
     emoji: "🔥",
   },
   {
     name: "Tondeuses & Gazon",
     href: "/boutique/tondeuses-gazon",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80",
+    image: "https://i.ibb.co/1tFwdBWC/tondeuse-thermique-lc-353v-husqvarna-2.png",
     count: "18 produits",
     emoji: "🌿",
   },
@@ -44,7 +44,7 @@ const categories = [
   {
     name: "Pergolas",
     href: "/boutique/pergolas",
-    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500&q=80",
+    image: "https://i.ibb.co/W4zK5tbL/KIT-000573-main-image-web-810faa601fa3497eb7396d1b49b47e00-xlarge.jpg",
     count: "20 produits",
     emoji: "🏡",
   },
