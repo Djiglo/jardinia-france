@@ -21,7 +21,11 @@ export default async function OrderDetailPage({ params }: Props) {
     },
   });
 
-  if (!order || order.userId !== session!.user!.id) notFound();
+  if (!session?.user?.id) {
+    const { redirect } = await import("next/navigation");
+    redirect(`/auth/connexion?callbackUrl=/compte/commandes/${id}`);
+  }
+  if (!order || order.userId !== session.user.id) notFound();
 
   const address = order.shippingAddress as any;
   const currentStep = STEPS.indexOf(order.status as any);

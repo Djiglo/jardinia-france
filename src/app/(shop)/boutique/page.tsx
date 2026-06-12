@@ -4,6 +4,8 @@ import ShopHeader from "@/components/shop/ShopHeader";
 import ProductGrid from "@/components/shop/ProductGrid";
 import type { Metadata } from "next";
 
+export const revalidate = 300; // 5 minutes
+
 export const metadata: Metadata = {
   title: "Boutique | Jardinia France",
   description: "Découvrez toute notre gamme de produits pour aménager et entretenir votre jardin : piscines, pergolas, mobilier de jardin, barbecues, tondeuses et outils de jardin. Livraison gratuite dès 79 €.",

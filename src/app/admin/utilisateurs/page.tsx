@@ -9,7 +9,7 @@ interface Props {
 
 export default async function AdminUsersPage({ searchParams }: Props) {
   const { page = "1", role = "", search = "" } = await searchParams;
-  const currentPage = parseInt(page);
+  const currentPage = Math.max(1, parseInt(page) || 1);
   const perPage = 25;
 
   const where: any = {};

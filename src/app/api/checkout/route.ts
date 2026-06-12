@@ -11,6 +11,9 @@ export async function POST(req: Request) {
     if (!items?.length) {
       return NextResponse.json({ error: "Panier vide" }, { status: 400 });
     }
+    if (items.length > 50) {
+      return NextResponse.json({ error: "Trop d'articles dans le panier" }, { status: 400 });
+    }
 
     // ─── 1. Vérifier les prix et le stock depuis la DB (jamais depuis le client) ──
     const productIds: string[] = items
@@ -37,6 +40,11 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+      const qty = parseInt(item.quantity);
+      if (!qty || qty < 1 || qty > 100) {
+        return NextResponse.json({ error: `Quantité invalide pour "${dbProduct.name}"` }, { status: 400 });
+      }
+      item.quantity = qty;
       if (dbProduct.stock < item.quantity) {
         return NextResponse.json(
           { error: `Stock insuffisant pour "${dbProduct.name}" (${dbProduct.stock} disponible${dbProduct.stock > 1 ? "s" : ""})` },

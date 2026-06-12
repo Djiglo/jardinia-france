@@ -30,8 +30,23 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { code, type, value, minOrderAmount, maxDiscount, usageLimit, isActive, expiresAt } = body;
 
+  const VALID_TYPES = ["PERCENTAGE", "FIXED_AMOUNT", "FREE_SHIPPING"];
   if (!code || !type || value === undefined) {
     return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
+  }
+  if (!VALID_TYPES.includes(type)) {
+    return NextResponse.json({ error: "Type de coupon invalide" }, { status: 400 });
+  }
+  const parsedValue = parseFloat(value);
+  if (isNaN(parsedValue) || parsedValue < 0) {
+    return NextResponse.json({ error: "Valeur de réduction invalide" }, { status: 400 });
+  }
+  if (type === "PERCENTAGE" && parsedValue > 100) {
+    return NextResponse.json({ error: "Le pourcentage ne peut pas dépasser 100%" }, { status: 400 });
+  }
+  const parsedUsageLimit = usageLimit ? parseInt(usageLimit) : null;
+  if (parsedUsageLimit !== null && parsedUsageLimit < 1) {
+    return NextResponse.json({ error: "La limite d'utilisation doit être ≥ 1" }, { status: 400 });
   }
 
   const existing = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
@@ -41,10 +56,10 @@ export async function POST(req: Request) {
     data: {
       code:           code.toUpperCase().trim(),
       type,
-      value:          parseFloat(value),
+      value:          parsedValue,
       minOrderAmount: minOrderAmount ? parseFloat(minOrderAmount) : null,
       maxDiscount:    maxDiscount    ? parseFloat(maxDiscount)    : null,
-      usageLimit:     usageLimit     ? parseInt(usageLimit)       : null,
+      usageLimit:     parsedUsageLimit,
       isActive:       isActive ?? true,
       expiresAt:      expiresAt ? new Date(expiresAt) : null,
     },

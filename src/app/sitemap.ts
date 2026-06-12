@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://jardinia-france.fr";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://jardinia-france.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dates fixes pour les pages statiques — évite de signaler une MAJ à chaque build

@@ -20,6 +20,14 @@ export async function PATCH(
   const body = await req.json();
   const { isActive, role } = body;
 
+  // Empêche un ADMIN de désactiver un SUPER_ADMIN
+  if (typeof isActive === "boolean" && isActive === false && session.user.role !== "SUPER_ADMIN") {
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (target?.role === "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Impossible de désactiver un Super Admin" }, { status: 403 });
+    }
+  }
+
   const data: any = {};
   if (typeof isActive === "boolean") data.isActive = isActive;
   if (role) {

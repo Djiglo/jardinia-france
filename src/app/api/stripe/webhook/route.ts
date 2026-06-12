@@ -46,7 +46,12 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
       expand: ["data.price.product"],
     });
 
-    const address    = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
+    let address = null;
+    try {
+      address = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
+    } catch {
+      console.error("Webhook: impossible de parser session.metadata.address", session.metadata?.address);
+    }
     const userId     = session.metadata?.userId   || null;
     const couponDbId = session.metadata?.couponDbId || null;
 

@@ -44,19 +44,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
   }
 
-  const order = await prisma.order.update({
-    where: { id },
-    data: {
-      ...(status && { status }),
-      ...(trackingNumber !== undefined && { trackingNumber: trackingNumber || null }),
-      ...(status && {
-        history: {
-          create: { status, comment: comment ?? null },
-        },
-      }),
-    },
-    include: { items: true, history: { orderBy: { createdAt: "asc" } } },
-  });
-
-  return NextResponse.json(order);
+  try {
+    const order = await prisma.order.update({
+      where: { id },
+      data: {
+        ...(status && { status }),
+        ...(trackingNumber !== undefined && { trackingNumber: trackingNumber || null }),
+        ...(status && {
+          history: {
+            create: { status, comment: comment ?? null },
+          },
+        }),
+      },
+      include: { items: true, history: { orderBy: { createdAt: "asc" } } },
+    });
+    return NextResponse.json(order);
+  } catch {
+    return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
+  }
 }

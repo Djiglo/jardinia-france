@@ -6,6 +6,8 @@ import crypto from "crypto";
 export async function POST(req: Request) {
   const { email } = await req.json();
   if (!email) return NextResponse.json({ error: "Email requis" }, { status: 400 });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return NextResponse.json({ ok: true }); // Ne pas révéler si l'email est invalide
 
   // Toujours répondre OK pour ne pas révéler si l'email existe
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });

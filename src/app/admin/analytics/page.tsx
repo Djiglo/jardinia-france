@@ -58,18 +58,22 @@ async function getAnalytics() {
     where: { createdAt: { gte: startOf6Months } },
   });
 
-  // Category revenue
+  // Category revenue (limité aux 50 meilleurs produits pour éviter une requête non bornée)
   const categoryRevenue = await prisma.orderItem.groupBy({
     by: ["productId"],
     where: { order: { paymentStatus: "PAID", createdAt: { gte: startOf6Months } } },
     _sum: { total: true },
+    orderBy: { _sum: { total: "desc" } },
+    take: 50,
   });
 
   const productIds = categoryRevenue.map((i) => i.productId);
-  const products = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: { id: true, category: { select: { name: true } } },
-  });
+  const products = productIds.length > 0
+    ? await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, category: { select: { name: true } } },
+      })
+    : [];
 
   const catMap: Record<string, number> = {};
   for (const item of categoryRevenue) {

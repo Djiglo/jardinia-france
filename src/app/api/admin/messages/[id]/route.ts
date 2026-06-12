@@ -12,7 +12,10 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  await prisma.contactMessage.delete({ where: { id } });
-
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.contactMessage.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: "Message introuvable" }, { status: 404 });
+  }
 }

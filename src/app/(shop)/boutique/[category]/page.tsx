@@ -5,6 +5,8 @@ import ShopFilters from "@/components/shop/ShopFilters";
 import ShopHeader from "@/components/shop/ShopHeader";
 import ProductGrid from "@/components/shop/ProductGrid";
 
+export const revalidate = 300; // 5 minutes
+
 interface Props {
   params:       Promise<{ category: string }>;
   searchParams: Promise<Record<string, string | undefined>>;

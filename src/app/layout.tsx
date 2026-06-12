@@ -105,6 +105,13 @@ export default function RootLayout({
               description: "Spécialiste des produits de jardin et d'extérieur",
               foundingDate: "2024",
               areaServed: "EU",
+              email: "contact@jardinia-france.fr",
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer service",
+                availableLanguage: "French",
+                url: `${process.env.NEXT_PUBLIC_APP_URL}/contact`,
+              },
               sameAs: [
                 "https://www.instagram.com/jardiniafrance",
               ],

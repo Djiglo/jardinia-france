@@ -11,6 +11,9 @@ export async function POST(req: Request) {
   if (password.length < 8) {
     return NextResponse.json({ error: "Mot de passe trop court (8 caractères min)" }, { status: 400 });
   }
+  if (password.length > 128) {
+    return NextResponse.json({ error: "Mot de passe trop long (128 caractères max)" }, { status: 400 });
+  }
 
   const record = await prisma.verificationToken.findUnique({
     where: { identifier_token: { identifier: email, token } },
@@ -22,15 +25,16 @@ export async function POST(req: Request) {
 
   const hashed = await bcrypt.hash(password, 12);
 
-  await prisma.user.update({
-    where: { email },
-    data: { password: hashed },
-  });
-
-  // Supprimer le token utilisé
-  await prisma.verificationToken.delete({
-    where: { identifier_token: { identifier: email, token } },
-  });
+  // Atomique : mise à jour mot de passe + suppression token en une seule transaction
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { email: record.identifier },
+      data: { password: hashed },
+    }),
+    prisma.verificationToken.delete({
+      where: { identifier_token: { identifier: record.identifier, token } },
+    }),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

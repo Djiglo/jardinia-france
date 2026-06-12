@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
-  const perPage = Math.min(48, parseInt(searchParams.get("perPage") ?? "24"));
+  const perPage = Math.max(1, Math.min(48, parseInt(searchParams.get("perPage") ?? "24") || 24));
   const search = searchParams.get("search") ?? "";
   const category = searchParams.get("category") ?? "";
   const brand = searchParams.get("brand") ?? "";

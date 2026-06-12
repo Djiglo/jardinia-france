@@ -80,8 +80,8 @@ export const useCartStore = create<CartStore>()(
       shippingMethod: "standard",
       itemCount: 0,
       subtotal: 0,
-      shippingCost: calculateShipping(0, "standard"),
-      total: calculateShipping(0, "standard"),
+      shippingCost: 0,
+      total: 0,
 
       addItem(product, variant = null, qty = 1) {
         set((state) => {

@@ -46,7 +46,7 @@ export default function CheckoutPage() {
     ? coupon.type === "percentage" ? (subtotal * coupon.discount) / 100
     : coupon.type === "free_shipping" ? shippingCost : coupon.discount
     : 0;
-  const total = subtotal - discountAmount + shippingCost;
+  const total = Math.max(0, subtotal - discountAmount + shippingCost);
 
   useEffect(() => {
     if (mounted && items.length === 0) router.push("/panier");
@@ -172,39 +172,39 @@ export default function CheckoutPage() {
               <h2 className="font-semibold text-anthracite-800 text-lg mb-2">Adresse de livraison</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                  <input className="input" value={address.firstName} onChange={(e) => setAddress({...address, firstName: e.target.value})} required />
+                  <label htmlFor="checkout-firstName" className="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                  <input id="checkout-firstName" className="input" value={address.firstName} onChange={(e) => setAddress({...address, firstName: e.target.value})} required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                  <input className="input" value={address.lastName} onChange={(e) => setAddress({...address, lastName: e.target.value})} required />
+                  <label htmlFor="checkout-lastName" className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                  <input id="checkout-lastName" className="input" value={address.lastName} onChange={(e) => setAddress({...address, lastName: e.target.value})} required />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
-                <input type="email" className="input" value={address.email} onChange={(e) => setAddress({...address, email: e.target.value})} required />
+                <label htmlFor="checkout-email" className="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                <input id="checkout-email" type="email" className="input" value={address.email} onChange={(e) => setAddress({...address, email: e.target.value})} required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                <input type="tel" className="input" value={address.phone} onChange={(e) => setAddress({...address, phone: e.target.value})} />
+                <label htmlFor="checkout-phone" className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                <input id="checkout-phone" type="tel" className="input" value={address.phone} onChange={(e) => setAddress({...address, phone: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Adresse *</label>
-                <input className="input" value={address.address} onChange={(e) => setAddress({...address, address: e.target.value})} required />
+                <label htmlFor="checkout-address" className="block text-sm font-medium text-gray-700 mb-1">Adresse *</label>
+                <input id="checkout-address" className="input" value={address.address} onChange={(e) => setAddress({...address, address: e.target.value})} required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Code postal *</label>
-                  <input className="input" value={address.postalCode} onChange={(e) => setAddress({...address, postalCode: e.target.value})} required />
+                  <label htmlFor="checkout-postalCode" className="block text-sm font-medium text-gray-700 mb-1">Code postal *</label>
+                  <input id="checkout-postalCode" className="input" value={address.postalCode} onChange={(e) => setAddress({...address, postalCode: e.target.value})} required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ville *</label>
-                  <input className="input" value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})} required />
+                  <label htmlFor="checkout-city" className="block text-sm font-medium text-gray-700 mb-1">Ville *</label>
+                  <input id="checkout-city" className="input" value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})} required />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pays *</label>
-                <select className="input" value={address.country} onChange={(e) => setAddress({...address, country: e.target.value})}>
+                <label htmlFor="checkout-country" className="block text-sm font-medium text-gray-700 mb-1">Pays *</label>
+                <select id="checkout-country" className="input" value={address.country} onChange={(e) => setAddress({...address, country: e.target.value})}>
                   {EU_COUNTRIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </div>

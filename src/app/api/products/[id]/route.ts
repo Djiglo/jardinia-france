@@ -13,6 +13,9 @@ async function requireAdmin() {
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  const isAdmin = session?.user && ["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string);
+
   const { id } = await params;
   const product = await prisma.product.findUnique({
     where: { id },
@@ -25,6 +28,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     },
   });
   if (!product) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+
+  // costPrice (marge) ne doit pas être exposé aux clients
+  if (!isAdmin) {
+    const { costPrice, ...publicProduct } = product as any;
+    void costPrice;
+    return NextResponse.json(publicProduct);
+  }
+
   return NextResponse.json(product);
 }
 

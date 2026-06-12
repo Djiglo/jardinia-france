@@ -25,7 +25,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
   const primaryImage =
     product.images.find((i) => i.isPrimary) ?? product.images[0];
   const discountPercent = product.compareAtPrice
-    ? getDiscountPercent(product.price, product.compareAtPrice)
+    ? getDiscountPercent(Number(product.price), Number(product.compareAtPrice))
     : 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
