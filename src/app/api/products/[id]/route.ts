@@ -70,7 +70,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (attributes !== undefined) {
       updateData.attributes = {
         deleteMany: {},
-        create: (attributes as { name: string; value: string }[]).filter((a) => a.name && a.value),
+        create: (attributes as any[])
+          .filter((a) => a.name && a.value)
+          .map(({ name, value }: { name: string; value: string }) => ({ name, value })),
       };
     }
 
