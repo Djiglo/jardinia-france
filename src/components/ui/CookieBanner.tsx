@@ -35,7 +35,7 @@ export function CookieBanner() {
                 <p className="font-semibold text-anthracite-800 text-sm">Nous utilisons des cookies</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   Nous utilisons des cookies pour améliorer votre expérience, analyser le trafic et personnaliser le contenu.{" "}
-                  <Link href="/politique-cookies" className="text-primary-600 hover:underline">En savoir plus</Link>
+                  <Link href="/cookies" className="text-primary-600 hover:underline">En savoir plus</Link>
                 </p>
               </div>
             </div>

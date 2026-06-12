@@ -8,8 +8,9 @@ import { ShoppingCart, Heart, Eye, Star } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import toast from "react-hot-toast";
 import type { Product } from "@/types";
+import { useWishlist } from "@/hooks/useWishlist";
+import toast from "react-hot-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -18,6 +19,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, className }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
+  const { toggle, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(product.id);
 
   const primaryImage =
     product.images.find((i) => i.isPrimary) ?? product.images[0];
@@ -75,14 +78,11 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           {/* Actions hover */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:text-primary-600 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                toast("Ajouté à vos favoris !", { icon: "❤️" });
-              }}
-              aria-label="Ajouter aux favoris"
+              className={cn("w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center transition-colors", inWishlist ? "text-red-500" : "hover:text-red-500")}
+              onClick={(e) => { e.preventDefault(); toggle(product.id, product.name); }}
+              aria-label={inWishlist ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
-              <Heart size={16} />
+              <Heart size={16} fill={inWishlist ? "currentColor" : "none"} />
             </button>
             <button
               className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:text-primary-600 transition-colors"

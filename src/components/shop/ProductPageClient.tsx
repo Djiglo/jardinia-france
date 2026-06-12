@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronRight, Plus, Minus, Share2, Check } from "lucide-react";
@@ -8,6 +9,7 @@ import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
 import ProductCard from "@/components/shop/ProductCard";
 import toast from "react-hot-toast";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductPageClientProps {
   product: any;
@@ -19,7 +21,37 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "specs" | "reviews">("description");
-  const [wishlist, setWishlist] = useState(false);
+  const { toggle: toggleWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(product.id);
+  const { data: session } = useSession();
+
+  // Formulaire d'avis
+  const [reviewForm, setReviewForm] = useState({ rating: 5, title: "", comment: "" });
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewDone, setReviewDone] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+
+  const submitReview = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewForm.comment.trim()) return;
+    setReviewLoading(true);
+    setReviewError("");
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, ...reviewForm }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setReviewError(data.error ?? "Erreur"); return; }
+      setReviewDone(true);
+      toast.success("Merci ! Votre avis sera publié après modération.");
+    } catch {
+      setReviewError("Une erreur est survenue.");
+    } finally {
+      setReviewLoading(false);
+    }
+  }, [product.id, reviewForm]);
   const [justAdded, setJustAdded] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
@@ -196,13 +228,13 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
             </button>
 
             <button
-              onClick={() => setWishlist(!wishlist)}
+              onClick={() => toggleWishlist(product.id, product.name)}
               className={`p-3 rounded-lg border transition-colors ${
-                wishlist ? "border-red-300 bg-red-50 text-red-500" : "border-gray-200 hover:border-red-300 text-gray-500"
+                inWishlist ? "border-red-300 bg-red-50 text-red-500" : "border-gray-200 hover:border-red-300 text-gray-500"
               }`}
-              aria-label="Favoris"
+              aria-label={inWishlist ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
-              <Heart size={18} fill={wishlist ? "currentColor" : "none"} />
+              <Heart size={18} fill={inWishlist ? "currentColor" : "none"} />
             </button>
 
             <button
@@ -303,6 +335,84 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 </div>
               ))
             )}
+
+            {/* Formulaire d'avis */}
+            <div className="mt-6 border-t border-gray-100 pt-6">
+              <h3 className="text-base font-semibold text-anthracite-800 mb-4">Laisser un avis</h3>
+              {!session?.user ? (
+                <p className="text-sm text-gray-500">
+                  <Link href="/auth/connexion" className="text-primary-600 hover:underline font-medium">Connectez-vous</Link> pour laisser un avis.
+                </p>
+              ) : reviewDone ? (
+                <div className="flex items-center gap-2 p-4 bg-green-50 rounded-xl text-green-700 text-sm font-medium">
+                  <Check size={16} /> Votre avis est en attente de modération. Merci !
+                </div>
+              ) : (
+                <form onSubmit={submitReview} className="space-y-4">
+                  {/* Étoiles */}
+                  <div>
+                    <p className="text-sm font-medium text-anthracite-700 mb-1.5">Note *</p>
+                    <div className="flex gap-1">
+                      {[1,2,3,4,5].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}
+                          className="transition-transform hover:scale-110"
+                          aria-label={`${s} étoile${s > 1 ? "s" : ""}`}
+                        >
+                          <Star
+                            size={24}
+                            className={s <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 fill-gray-300"}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Titre */}
+                  <div>
+                    <label className="text-sm font-medium text-anthracite-700 block mb-1">Titre (optionnel)</label>
+                    <input
+                      type="text"
+                      value={reviewForm.title}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))}
+                      placeholder="Ex : Excellent produit !"
+                      className="input w-full"
+                      maxLength={120}
+                    />
+                  </div>
+
+                  {/* Commentaire */}
+                  <div>
+                    <label className="text-sm font-medium text-anthracite-700 block mb-1">Commentaire *</label>
+                    <textarea
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                      placeholder="Partagez votre expérience avec ce produit..."
+                      rows={4}
+                      required
+                      className="input w-full resize-none"
+                      maxLength={2000}
+                    />
+                  </div>
+
+                  {reviewError && (
+                    <p className="text-sm text-red-600">
+                      {reviewError === "ALREADY_REVIEWED" ? "Vous avez déjà laissé un avis pour ce produit." : reviewError}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={reviewLoading || !reviewForm.comment.trim()}
+                    className="btn-primary px-6 py-2.5 disabled:opacity-50"
+                  >
+                    {reviewLoading ? "Envoi..." : "Publier mon avis"}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         )}
       </div>
