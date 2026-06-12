@@ -3,22 +3,25 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf, BookOpen, MessageSquare } from "lucide-react";
 import SignOutButton from "@/components/layout/SignOutButton";
+import { prisma } from "@/lib/prisma";
 
 const NAV = [
-  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/admin/produits", label: "Produits", icon: Package },
-  { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
-  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
-  { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
-  { href: "/admin/promotions", label: "Promotions", icon: Tag },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/parametres", label: "Paramètres", icon: Settings },
-  { href: "/admin/guide", label: "Guide de démarrage", icon: BookOpen },
+  { href: "/admin",              label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/admin/produits",     label: "Produits",        icon: Package },
+  { href: "/admin/commandes",    label: "Commandes",       icon: ShoppingCart },
+  { href: "/admin/messages",     label: "Messages",        icon: MessageSquare },
+  { href: "/admin/utilisateurs", label: "Utilisateurs",    icon: Users },
+  { href: "/admin/promotions",   label: "Promotions",      icon: Tag },
+  { href: "/admin/analytics",    label: "Analytics",       icon: BarChart3 },
+  { href: "/admin/parametres",   label: "Paramètres",      icon: Settings },
+  { href: "/admin/guide",        label: "Guide de démarrage", icon: BookOpen },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) redirect("/");
+
+  const unreadMessages = await prisma.contactMessage.count({ where: { isRead: false } });
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -40,7 +43,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-anthracite-700 hover:text-white transition-colors"
             >
               <Icon size={18} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {href === "/admin/messages" && unreadMessages > 0 && (
+                <span className="min-w-[20px] h-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                  {unreadMessages > 99 ? "99+" : unreadMessages}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
