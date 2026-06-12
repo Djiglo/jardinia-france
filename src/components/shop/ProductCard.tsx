@@ -4,7 +4,7 @@
 // ================================================
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Heart, Eye, Star } from "lucide-react";
+import { ShoppingCart, Heart, Eye, Star, Ban } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
               src={primaryImage.url}
               alt={primaryImage.alt ?? product.name}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className={`object-cover transition-transform duration-500 group-hover:scale-105 ${product.stock === 0 ? "opacity-50" : ""}`}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
@@ -57,23 +57,32 @@ export default function ProductCard({ product, className }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {discountPercent > 0 && (
+          {/* Badge remise — haut gauche, seul */}
+          {discountPercent > 0 && (
+            <div className="absolute top-3 left-3">
               <span className="badge-promo text-xs">-{discountPercent}%</span>
-            )}
-            {product.isNew && (
-              <span className="badge-new text-xs">Nouveau</span>
-            )}
-            {product.isBestSeller && !product.isNew && (
-              <span className="badge-bestseller text-xs">Best-seller</span>
-            )}
-            {product.stock === 0 && (
-              <span className="badge bg-gray-100 text-gray-600 text-xs">
-                Rupture
-              </span>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Badges Nouveau / Best-seller — bas gauche */}
+          {(product.isNew || product.isBestSeller) && product.stock > 0 && (
+            <div className="absolute bottom-10 left-2 flex flex-col gap-1">
+              {product.isNew && (
+                <span className="badge-new text-xs">Nouveau</span>
+              )}
+              {product.isBestSeller && (
+                <span className="badge-bestseller text-xs">Best-seller</span>
+              )}
+            </div>
+          )}
+
+          {/* Rupture — bannière pleine largeur en bas */}
+          {product.stock === 0 && (
+            <div className="absolute inset-x-0 bottom-0 bg-gray-900/80 backdrop-blur-sm py-2.5 flex items-center justify-center gap-2 text-white font-semibold text-sm">
+              <Ban size={15} />
+              Rupture de stock
+            </div>
+          )}
 
           {/* Actions hover */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
