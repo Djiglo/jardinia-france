@@ -1,15 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import Link from "next/link";
-import { Package, Heart, MapPin, User } from "lucide-react";
-import SignOutButton from "@/components/layout/SignOutButton";
-
-const navItems = [
-  { href: "/compte",           label: "Tableau de bord", icon: User    },
-  { href: "/compte/commandes", label: "Mes commandes",   icon: Package },
-  { href: "/compte/favoris",   label: "Mes favoris",     icon: Heart   },
-  { href: "/compte/adresses",  label: "Mes adresses",    icon: MapPin  },
-];
+import CompteNav from "./CompteNav";
 
 export default async function CompteLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -32,19 +23,7 @@ export default async function CompteLayout({ children }: { children: React.React
                 <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
               </div>
             </div>
-            <nav className="space-y-1">
-              {navItems.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-colors"
-                >
-                  <Icon size={17} />
-                  {label}
-                </Link>
-              ))}
-              <SignOutButton className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors mt-2 pt-3 border-t border-gray-100 w-full text-left" />
-            </nav>
+            <CompteNav />
           </div>
         </aside>
 

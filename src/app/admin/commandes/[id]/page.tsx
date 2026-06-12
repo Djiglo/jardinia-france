@@ -125,7 +125,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </address>
               {order.shippingMethod && (
                 <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">
-                  Mode : {order.shippingMethod === "express" ? "Express (2-3j)" : "Standard (5-7j)"}
+                  Mode : {order.shippingMethod === "express" ? "Express (1-2j)" : "Standard (3-5j)"}
                 </p>
               )}
             </div>

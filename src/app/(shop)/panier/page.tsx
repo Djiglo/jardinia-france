@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Trash2, Plus, Minus, Tag, ArrowRight, ShoppingBag } from "lucide-react";
@@ -12,8 +12,11 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, coupon, setCoupon, subtotal, shippingCost, total, clearCart } =
     useCartStore();
 
+  const [mounted, setMounted] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const validateCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -44,6 +47,14 @@ export default function CartPage() {
         ? (subtotal * coupon.discount) / 100
         : coupon.type === "free_shipping" ? 0 : coupon.discount
       : 0;
+
+  if (!mounted) {
+    return (
+      <div className="container mx-auto px-4 py-24 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto" />
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -163,7 +174,7 @@ export default function CartPage() {
 
             <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between font-bold text-lg">
               <span className="text-anthracite-800">Total</span>
-              <span className="text-primary-600">{formatPrice(total - discountAmount)}</span>
+              <span className="text-primary-600">{formatPrice(total)}</span>
             </div>
 
             <Link href="/checkout" className="btn-primary w-full flex items-center justify-center gap-2 mt-5 py-3">

@@ -145,7 +145,7 @@ export default function RegisterPage() {
                 J'accepte les{" "}
                 <Link href="/cgv" className="text-primary-600 hover:underline" target="_blank">conditions générales</Link>
                 {" "}et la{" "}
-                <Link href="/politique-confidentialite" className="text-primary-600 hover:underline" target="_blank">politique de confidentialité</Link>
+                <Link href="/confidentialite" className="text-primary-600 hover:underline" target="_blank">politique de confidentialité</Link>
               </span>
             </label>
             <button
