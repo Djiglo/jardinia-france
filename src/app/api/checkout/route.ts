@@ -26,8 +26,18 @@ export async function POST(req: Request) {
     const shippingCost =
       rate.freeFrom !== null && subtotal >= rate.freeFrom ? 0 : rate.price;
 
+    // Normaliser les items pour inclure productId et sku
+    const normalizedItems = items.map((item: any) => ({
+      productId: item.productId ?? item.product?.id ?? "",
+      sku: item.product?.sku ?? item.sku ?? "N/A",
+      name: item.product?.name ?? item.name ?? "",
+      price: item.variant?.price ?? item.product?.price ?? item.price ?? 0,
+      quantity: item.quantity,
+      image: item.product?.images?.[0]?.url ?? item.image,
+    }));
+
     const stripeSession = await createStripeCheckoutSession({
-      items,
+      items: normalizedItems,
       customerEmail: address.email,
       orderId,
       shippingCost,

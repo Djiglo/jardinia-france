@@ -57,9 +57,12 @@ export default async function CategoryPage({ params, searchParams }: any) {
 
   const enriched = products.map((p) => ({
     ...p,
+    price: Number(p.price),
+    compareAtPrice: p.compareAtPrice != null ? Number(p.compareAtPrice) : null,
+    costPrice: p.costPrice != null ? Number(p.costPrice) : null,
     averageRating: p.reviews.length > 0 ? p.reviews.reduce((a, r) => a + r.rating, 0) / p.reviews.length : null,
     reviewCount: p._count.reviews,
-  }));
+  })) as any;
 
   return (
     <div className="container mx-auto px-4 py-8">

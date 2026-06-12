@@ -8,7 +8,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2025-02-24.acacia",
   typescript: true,
 });
 
@@ -48,7 +48,7 @@ export async function createStripeCheckoutSession({
   userId,
   addressJson,
 }: {
-  items: Array<{ name: string; price: number; quantity: number; image?: string }>;
+  items: Array<{ productId: string; sku: string; name: string; price: number; quantity: number; image?: string }>;
   customerEmail: string;
   orderId: string;
   shippingCost: number;
@@ -65,8 +65,9 @@ export async function createStripeCheckoutSession({
         product_data: {
           name: item.name,
           images: item.image ? [item.image] : [],
+          metadata: { productId: item.productId, sku: item.sku },
         },
-        unit_amount: Math.round(item.price * 100), // centimes
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
     })

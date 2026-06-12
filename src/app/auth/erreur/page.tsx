@@ -15,13 +15,13 @@ const AUTH_ERRORS: Record<string, string> = {
   Default: "Une erreur est survenue lors de la connexion.",
 };
 
-export default function AuthErrorPage({
+export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const message =
-    AUTH_ERRORS[searchParams.error ?? "Default"] ?? AUTH_ERRORS.Default;
+  const { error } = await searchParams;
+  const message = AUTH_ERRORS[error ?? "Default"] ?? AUTH_ERRORS.Default;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

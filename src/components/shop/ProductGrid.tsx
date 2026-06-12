@@ -1,22 +1,7 @@
 import Link from "next/link";
 import ProductCard from "./ProductCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  compareAtPrice: number | null;
-  stock: number;
-  images: { url: string; alt: string | null }[];
-  category: { name: string; slug: string };
-  _avg?: { rating: number | null };
-  _count?: { reviews: number };
-  isFeatured?: boolean;
-  isNew?: boolean;
-  isBestSeller?: boolean;
-}
+import type { Product } from "@/types";
 
 interface ProductGridProps {
   products: Product[];
@@ -69,11 +54,7 @@ export default function ProductGrid({
         {products.map((product) => (
           <ProductCard
             key={product.id}
-            product={{
-              ...product,
-              averageRating: product._avg?.rating ?? null,
-              reviewCount: product._count?.reviews ?? 0,
-            }}
+            product={product}
           />
         ))}
       </div>

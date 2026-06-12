@@ -12,17 +12,17 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, coupon, setCoupon, subtotal, shippingCost, total, clearCart } =
     useCartStore();
 
-  const [couponCode, setCouponCode] = useState("");
+  const [couponInput, setCouponInput] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
   const validateCoupon = async () => {
-    if (!couponCode.trim()) return;
+    if (!couponInput.trim()) return;
     setCouponLoading(true);
     try {
       const res = await fetch("/api/coupons/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode, subtotal }),
+        body: JSON.stringify({ code: couponInput, subtotal }),
       });
       const data = await res.json();
       if (data.valid) {
@@ -42,7 +42,7 @@ export default function CartPage() {
     coupon
       ? coupon.type === "percentage"
         ? (subtotal * coupon.discount) / 100
-        : coupon.discount
+        : coupon.type === "free_shipping" ? 0 : coupon.discount
       : 0;
 
   if (items.length === 0) {
@@ -70,16 +70,21 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Liste articles */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
+          {items.map((item) => {
+            const itemPrice = Number(item.variant?.price ?? item.product.price);
+            const itemImage = item.product.images?.[0]?.url ?? "/placeholder.svg";
+            const itemStock = item.variant?.stock ?? item.product.stock;
+            return (
             <div key={item.id} className="card p-4 flex gap-4">
               <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-                <Image src={item.image || "/placeholder.jpg"} alt={item.name} fill className="object-cover" />
+                <Image src={itemImage} alt={item.product.name} fill className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <Link href={`/boutique/produit/${item.slug}`} className="font-medium text-anthracite-800 hover:text-primary-600 line-clamp-2 block">
-                  {item.name}
+                <Link href={`/boutique/produit/${item.product.slug}`} className="font-medium text-anthracite-800 hover:text-primary-600 line-clamp-2 block">
+                  {item.product.name}
+                  {item.variant && <span className="text-sm font-normal text-gray-400 ml-1">— {item.variant.value}</span>}
                 </Link>
-                <p className="text-primary-600 font-bold mt-1">{formatPrice(item.price)}</p>
+                <p className="text-primary-600 font-bold mt-1">{formatPrice(itemPrice)}</p>
                 <div className="flex items-center gap-3 mt-2">
                   <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                     <button
@@ -92,7 +97,7 @@ export default function CartPage() {
                     <span className="px-3 py-1 text-sm font-medium">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      disabled={item.quantity >= item.stock}
+                      disabled={item.quantity >= itemStock}
                       className="px-2 py-1 hover:bg-gray-50 transition-colors disabled:opacity-40"
                       aria-label="Augmenter"
                     >
@@ -100,7 +105,7 @@ export default function CartPage() {
                     </button>
                   </div>
                   <span className="text-sm font-semibold text-anthracite-700">
-                    {formatPrice(item.price * item.quantity)}
+                    {formatPrice(itemPrice * item.quantity)}
                   </span>
                   <button
                     onClick={() => { removeItem(item.id); toast.success("Article retiré"); }}
@@ -112,7 +117,7 @@ export default function CartPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )})}
 
           <div className="flex justify-between items-center pt-2">
             <button onClick={() => { clearCart(); toast.success("Panier vidé"); }} className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1">
@@ -189,7 +194,7 @@ export default function CartPage() {
                     {coupon.type === "percentage" ? `-${coupon.discount}%` : `-${formatPrice(coupon.discount)}`}
                   </p>
                 </div>
-                <button onClick={() => setCoupon(null)} className="text-gray-400 hover:text-red-500 text-xs">
+                <button onClick={() => setCoupon(null)} className="text-gray-400 hover:text-red-500 text-xs" type="button">
                   Retirer
                 </button>
               </div>
@@ -198,14 +203,14 @@ export default function CartPage() {
                 <input
                   type="text"
                   placeholder="JARDINIA10"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                   onKeyDown={(e) => e.key === "Enter" && validateCoupon()}
                   className="input flex-1 text-sm py-2"
                 />
                 <button
                   onClick={validateCoupon}
-                  disabled={couponLoading || !couponCode.trim()}
+                  disabled={couponLoading || !couponInput.trim()}
                   className="btn-outline text-sm px-3 py-2 disabled:opacity-50"
                 >
                   {couponLoading ? "..." : "OK"}

@@ -107,7 +107,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{order._count.items}</td>
                   <td className="px-4 py-3 font-semibold text-anthracite-700">
-                    {formatPrice(order.total)}
+                    {formatPrice(Number(order.total))}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}`}>

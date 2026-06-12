@@ -1,13 +1,10 @@
-// ================================================
-// JARDINIA FRANCE - Store Panier (Zustand)
-// ================================================
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product, ProductVariant } from "@/types";
 import { calculateShipping } from "@/lib/utils";
 
-interface LocalCartItem {
-  id: string; // productId[-variantId]
+export interface LocalCartItem {
+  id: string;
   productId: string;
   variantId: string | null;
   quantity: number;
@@ -15,10 +12,15 @@ interface LocalCartItem {
   variant: ProductVariant | null;
 }
 
+export interface AppliedCoupon {
+  code: string;
+  discount: number;
+  type: "percentage" | "fixed" | "free_shipping";
+}
+
 interface CartStore {
   items: LocalCartItem[];
-  couponCode: string | null;
-  discount: number;
+  coupon: AppliedCoupon | null;
   shippingMethod: "standard" | "express";
 
   // Computed
@@ -32,7 +34,7 @@ interface CartStore {
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
-  setCoupon: (code: string, discount: number) => void;
+  setCoupon: (coupon: AppliedCoupon | null) => void;
   removeCoupon: () => void;
   setShippingMethod: (method: "standard" | "express") => void;
 }
@@ -41,12 +43,18 @@ function makeItemId(productId: string, variantId: string | null) {
   return variantId ? `${productId}-${variantId}` : productId;
 }
 
+function computeDiscount(coupon: AppliedCoupon | null, subtotal: number): number {
+  if (!coupon) return 0;
+  if (coupon.type === "percentage") return (subtotal * coupon.discount) / 100;
+  if (coupon.type === "free_shipping") return 0;
+  return coupon.discount;
+}
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      couponCode: null,
-      discount: 0,
+      coupon: null,
       shippingMethod: "standard",
 
       get itemCount() {
@@ -64,12 +72,15 @@ export const useCartStore = create<CartStore>()(
       },
 
       get shippingCost() {
-        return calculateShipping(get().subtotal, get().shippingMethod);
+        const s = get();
+        const base = calculateShipping(s.subtotal, s.shippingMethod);
+        return s.coupon?.type === "free_shipping" ? 0 : base;
       },
 
       get total() {
         const s = get();
-        return Math.max(0, s.subtotal + s.shippingCost - s.discount);
+        const disc = computeDiscount(s.coupon, s.subtotal);
+        return Math.max(0, s.subtotal + s.shippingCost - disc);
       },
 
       addItem(product, variant = null, qty = 1) {
@@ -79,9 +90,7 @@ export const useCartStore = create<CartStore>()(
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.id === itemId
-                  ? { ...i, quantity: i.quantity + qty }
-                  : i
+                i.id === itemId ? { ...i, quantity: i.quantity + qty } : i
               ),
             };
           }
@@ -102,33 +111,26 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem(itemId) {
-        set((state) => ({
-          items: state.items.filter((i) => i.id !== itemId),
-        }));
+        set((state) => ({ items: state.items.filter((i) => i.id !== itemId) }));
       },
 
       updateQuantity(itemId, quantity) {
-        if (quantity <= 0) {
-          get().removeItem(itemId);
-          return;
-        }
+        if (quantity <= 0) { get().removeItem(itemId); return; }
         set((state) => ({
-          items: state.items.map((i) =>
-            i.id === itemId ? { ...i, quantity } : i
-          ),
+          items: state.items.map((i) => i.id === itemId ? { ...i, quantity } : i),
         }));
       },
 
       clearCart() {
-        set({ items: [], couponCode: null, discount: 0 });
+        set({ items: [], coupon: null });
       },
 
-      setCoupon(code, discount) {
-        set({ couponCode: code, discount });
+      setCoupon(coupon) {
+        set({ coupon });
       },
 
       removeCoupon() {
-        set({ couponCode: null, discount: 0 });
+        set({ coupon: null });
       },
 
       setShippingMethod(method) {
@@ -137,11 +139,9 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "jardinia-cart",
-      // Ne persister que les items et coupon, pas les getters
       partialize: (state) => ({
         items: state.items,
-        couponCode: state.couponCode,
-        discount: state.discount,
+        coupon: state.coupon,
         shippingMethod: state.shippingMethod,
       }),
     }

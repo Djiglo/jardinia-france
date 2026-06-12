@@ -32,71 +32,73 @@ export async function POST(req: Request) {
 
 async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
   try {
-    // Récupérer les line items
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 });
+    // Expand product metadata to retrieve our productId and sku
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      limit: 100,
+      expand: ["data.price.product"],
+    });
+
     const address = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
-    const userId = session.metadata?.userId;
+    const userId = session.metadata?.userId || null;
 
-    // Calcul totaux
-    const subtotal = (session.amount_subtotal ?? 0) / 100;
-    const shippingTotal = (session.total_details?.amount_shipping ?? 0) / 100;
-    const discountTotal = (session.total_details?.amount_discount ?? 0) / 100;
-    const total = (session.amount_total ?? 0) / 100;
+    const subtotal    = (session.amount_subtotal ?? 0) / 100;
+    const shippingCost = (session.total_details?.amount_shipping ?? 0) / 100;
+    const discount    = (session.total_details?.amount_discount ?? 0) / 100;
+    const total       = (session.amount_total ?? 0) / 100;
 
-    // Créer la commande
     const order = await prisma.order.create({
       data: {
-        orderNumber: generateOrderNumber(),
-        userId: userId ?? null,
-        status: "CONFIRMED",
-        paymentStatus: "PAID",
-        paymentMethod: "stripe",
+        orderNumber:    generateOrderNumber(),
+        userId,
+        status:         "CONFIRMED",
+        paymentStatus:  "PAID",
+        paymentMethod:  "stripe",
         stripeSessionId: session.id,
         subtotal,
-        shippingTotal,
-        discountTotal,
+        shippingCost,
+        discount,
         total,
-        shippingAddress: address ? {
-          firstName: address.firstName,
-          lastName: address.lastName,
-          address: address.address,
-          city: address.city,
-          postalCode: address.postalCode,
-          country: address.country,
-          phone: address.phone,
-        } : {},
+        shippingAddress: address ?? {},
         items: {
-          create: lineItems.data.map((item) => ({
-            productId: item.price?.product as string,
-            name: item.description ?? "",
-            price: (item.price?.unit_amount ?? 0) / 100,
-            quantity: item.quantity ?? 1,
-            total: ((item.price?.unit_amount ?? 0) * (item.quantity ?? 1)) / 100,
-          })),
+          create: lineItems.data.map((item) => {
+            const product = item.price?.product as Stripe.Product | null;
+            const productId = product?.metadata?.productId ?? "";
+            const sku       = product?.metadata?.sku ?? "N/A";
+            const price     = (item.price?.unit_amount ?? 0) / 100;
+            return {
+              productId: productId || undefined as any,
+              name:      item.description ?? product?.name ?? "",
+              sku,
+              price,
+              quantity:  item.quantity ?? 1,
+              total:     price * (item.quantity ?? 1),
+            };
+          }).filter((i) => i.productId),
         },
       },
     });
 
-    // Email de confirmation
     if (session.customer_email) {
       sendOrderConfirmationEmail({
-        to: session.customer_email,
-        firstName: address?.firstName ?? "Client",
+        to:          session.customer_email,
+        firstName:   address?.firstName ?? "Client",
         orderNumber: order.orderNumber,
         total,
         items: lineItems.data.map((i) => ({
-          name: i.description ?? "",
+          name:     i.description ?? "",
           quantity: i.quantity ?? 1,
-          price: (i.price?.unit_amount ?? 0) / 100,
+          price:    (i.price?.unit_amount ?? 0) / 100,
         })),
       }).catch(console.error);
     }
 
-    // Mettre à jour les stocks
+    // Mise à jour des stocks
     for (const item of lineItems.data) {
-      if (item.price?.product) {
+      const product = item.price?.product as Stripe.Product | null;
+      const productId = product?.metadata?.productId;
+      if (productId) {
         await prisma.product.update({
-          where: { id: item.price.product as string },
+          where: { id: productId },
           data: { stock: { decrement: item.quantity ?? 1 } },
         }).catch(console.error);
       }

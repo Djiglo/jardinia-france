@@ -31,9 +31,9 @@ async function getStats() {
     }),
   ]);
 
-  const revenueGrowth = lastMonthRevenue._sum.total
-    ? (((monthRevenue._sum.total ?? 0) - lastMonthRevenue._sum.total) / lastMonthRevenue._sum.total) * 100
-    : 0;
+  const lastTotal = Number(lastMonthRevenue._sum.total ?? 0);
+  const currTotal = Number(monthRevenue._sum.total ?? 0);
+  const revenueGrowth = lastTotal > 0 ? ((currTotal - lastTotal) / lastTotal) * 100 : 0;
 
   return { totalRevenue, monthRevenue, revenueGrowth, totalOrders, monthOrders, totalUsers, monthUsers, totalProducts, lowStockProducts, recentOrders };
 }
@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
 
   const kpis = [
     {
-      label: "Chiffre d'affaires (ce mois)", value: formatPrice(stats.monthRevenue._sum.total ?? 0),
+      label: "Chiffre d'affaires (ce mois)", value: formatPrice(Number(stats.monthRevenue._sum.total ?? 0)),
       sub: `${stats.revenueGrowth >= 0 ? "+" : ""}${stats.revenueGrowth.toFixed(1)}% vs mois dernier`,
       icon: TrendingUp, color: "text-primary-600 bg-primary-50",
       trend: stats.revenueGrowth >= 0,
@@ -127,7 +127,7 @@ export default async function AdminDashboard() {
                   {STATUS_LABELS[order.status] ?? order.status}
                 </span>
                 <span className="text-sm font-semibold text-anthracite-700 ml-2">
-                  {formatPrice(order.total)}
+                  {formatPrice(Number(order.total))}
                 </span>
               </Link>
             ))}

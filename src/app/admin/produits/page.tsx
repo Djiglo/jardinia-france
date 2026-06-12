@@ -104,9 +104,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                   </td>
                   <td className="px-4 py-3 text-gray-500">{product.category.name}</td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-anthracite-700">{formatPrice(product.price)}</p>
+                    <p className="font-semibold text-anthracite-700">{formatPrice(Number(product.price))}</p>
                     {product.compareAtPrice && (
-                      <p className="text-xs text-gray-400 line-through">{formatPrice(product.compareAtPrice)}</p>
+                      <p className="text-xs text-gray-400 line-through">{formatPrice(Number(product.compareAtPrice))}</p>
                     )}
                   </td>
                   <td className="px-4 py-3">

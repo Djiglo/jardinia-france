@@ -118,6 +118,7 @@ export interface Product {
   attributes: ProductAttribute[];
   reviews?: Review[];
   avgRating?: number;
+  averageRating?: number | null;
   reviewCount?: number;
 }
 

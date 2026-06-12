@@ -40,7 +40,8 @@ export default function CheckoutPage() {
 
   const shippingCost = subtotal >= 79 ? 0 : shippingMethod === "express" ? 12.99 : 5.99;
   const discountAmount = coupon
-    ? coupon.type === "percentage" ? (subtotal * coupon.discount) / 100 : coupon.discount
+    ? coupon.type === "percentage" ? (subtotal * coupon.discount) / 100
+    : coupon.type === "free_shipping" ? shippingCost : coupon.discount
     : 0;
   const total = subtotal - discountAmount + shippingCost;
 
@@ -64,7 +65,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, address, shippingMethod, coupon }),
+        body: JSON.stringify({ items, address, shippingMethod, couponCode: coupon?.code }),
       });
       const { url, error } = await res.json();
       if (error) { toast.error(error); return; }
@@ -86,10 +87,11 @@ export default function CheckoutPage() {
         {items.map((item) => (
           <div key={item.id} className="flex justify-between text-sm gap-2">
             <span className="text-gray-600 truncate">
-              {item.name}
+              {item.product.name}
+              {item.variant && <span className="text-gray-400"> ({item.variant.value})</span>}
               <span className="text-gray-400"> ×{item.quantity}</span>
             </span>
-            <span className="font-medium whitespace-nowrap">{formatPrice(item.price * item.quantity)}</span>
+            <span className="font-medium whitespace-nowrap">{formatPrice(Number(item.variant?.price ?? item.product.price) * item.quantity)}</span>
           </div>
         ))}
       </div>
