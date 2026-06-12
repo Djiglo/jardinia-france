@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ShoppingCart, Heart, Star, Truck, Shield, RotateCcw,
-  ChevronRight, Plus, Minus, Share2, Check, BadgeCheck,
+  ChevronRight, ChevronLeft, Plus, Minus, Share2, Check, BadgeCheck,
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
@@ -97,7 +97,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
 
         {/* ── Galerie ── */}
         <div className="space-y-3 lg:sticky lg:top-24 lg:self-start">
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group">
             <Image
               src={product.images[selectedImage]?.url ?? "/placeholder.svg"}
               alt={product.images[selectedImage]?.alt ?? product.name}
@@ -115,6 +115,34 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
               <span className="absolute top-4 left-4 bg-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                 Nouveau
               </span>
+            )}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white/80 hover:bg-white text-anthracite-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Photo précédente"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white/80 hover:bg-white text-anthracite-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Photo suivante"
+                >
+                  <ChevronRight size={20} />
+                </button>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {product.images.map((_: any, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`rounded-full transition-all ${i === selectedImage ? "w-4 h-1.5 bg-primary-500" : "w-1.5 h-1.5 bg-white/60 hover:bg-white/90"}`}
+                      aria-label={`Photo ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
           {product.images.length > 1 && (
