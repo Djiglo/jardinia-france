@@ -2,7 +2,7 @@
 // ================================================
 // JARDINIA FRANCE - Header Principal
 // ================================================
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
@@ -88,6 +88,16 @@ export function Header() {
   const [activeNav, setActiveNav] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openNav = useCallback((href: string) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setActiveNav(href);
+  }, []);
+
+  const closeNav = useCallback(() => {
+    closeTimer.current = setTimeout(() => setActiveNav(null), 180);
+  }, []);
   const items = useCartStore((s) => s.items);
   const cartCount = items.reduce((acc, i) => acc + i.quantity, 0);
 
@@ -169,9 +179,9 @@ export function Header() {
               {navCategories.map((cat) => (
                 <div
                   key={cat.href}
-                  className="relative group"
-                  onMouseEnter={() => setActiveNav(cat.href)}
-                  onMouseLeave={() => setActiveNav(null)}
+                  className="relative"
+                  onMouseEnter={() => openNav(cat.href)}
+                  onMouseLeave={closeNav}
                 >
                   <Link
                     href={cat.href}
@@ -186,20 +196,30 @@ export function Header() {
                     <ChevronDown
                       size={14}
                       className={cn(
-                        "transition-transform",
+                        "transition-transform duration-200",
                         activeNav === cat.href ? "rotate-180" : ""
                       )}
                     />
                   </Link>
 
+                  {/* Pont invisible qui couvre le gap entre bouton et dropdown */}
+                  {activeNav === cat.href && (
+                    <div className="absolute top-full left-0 w-full h-2 z-50" />
+                  )}
+
                   {/* Dropdown */}
                   {cat.children && activeNav === cat.href && (
-                    <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                    <div
+                      className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                      onMouseEnter={() => openNav(cat.href)}
+                      onMouseLeave={closeNav}
+                    >
                       {cat.children.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="block px-4 py-2 text-sm text-anthracite-700 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+                          onClick={() => setActiveNav(null)}
+                          className="block px-4 py-2.5 text-sm text-anthracite-700 hover:text-primary-700 hover:bg-primary-50 transition-colors"
                         >
                           {child.label}
                         </Link>
