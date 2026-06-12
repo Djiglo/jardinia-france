@@ -11,6 +11,7 @@ export default async function CategoryPage({ params, searchParams }: any) {
   const category = resolvedParams.category;
   const page = resolvedSearch.page ?? "1";
   const sort = resolvedSearch.sort ?? "newest";
+  const type = resolvedSearch.type;
   const brand = resolvedSearch.brand;
   const minPrice = resolvedSearch.minPrice;
   const maxPrice = resolvedSearch.maxPrice;
@@ -24,6 +25,7 @@ export default async function CategoryPage({ params, searchParams }: any) {
   const perPage = 24;
 
   const where: any = { isActive: true, category: { slug: category } };
+  if (type) where.tags = { has: type };
   if (brand) where.brand = { name: { contains: brand, mode: "insensitive" } };
   if (minPrice) where.price = { ...(where.price ?? {}), gte: parseFloat(minPrice) };
   if (maxPrice) where.price = { ...(where.price ?? {}), lte: parseFloat(maxPrice) };
@@ -66,7 +68,10 @@ export default async function CategoryPage({ params, searchParams }: any) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{cat.name}</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        {cat.name}
+        {type && <span className="text-lg font-normal text-gray-500 ml-2 capitalize">— {type}</span>}
+      </h1>
       <div className="flex gap-8">
         <ShopFilters
           categories={categories}

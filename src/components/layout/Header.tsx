@@ -55,7 +55,7 @@ const navCategories = [
     label: "Tondeuses & Gazon",
     href: "/boutique/tondeuses-gazon",
     children: [
-      { label: "Tondeuses", href: "/boutique/tondeuses-gazon" },
+      { label: "Tondeuses à gazon", href: "/boutique/tondeuses-gazon?type=tondeuse" },
       { label: "Robots tondeuses", href: "/boutique/tondeuses-gazon?type=robot" },
       { label: "Engrais & Semences", href: "/boutique/tondeuses-gazon?type=engrais" },
     ],
