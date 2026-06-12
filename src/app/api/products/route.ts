@@ -69,43 +69,61 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
-  }
+  try {
+    const session = await auth();
+    if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+    }
 
-  const body = await req.json();
-  const { images = [], attributes = [], ...data } = body;
+    const body = await req.json();
+    const { images = [], attributes = [], ...raw } = body;
 
-  if (!data.name || !data.price || !data.categoryId || !data.sku) {
-    return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
-  }
+    if (!raw.name || !raw.price || !raw.categoryId || !raw.sku) {
+      return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
+    }
 
-  if (!data.brandId) data.brandId = null;
-  const slug = data.slug || slugify(data.name);
-  const existing = await prisma.product.findFirst({ where: { OR: [{ slug }, { sku: data.sku }] } });
-  if (existing) return NextResponse.json({ error: "Slug ou SKU déjà utilisé" }, { status: 409 });
+    const slug = raw.slug || slugify(raw.name);
+    const existing = await prisma.product.findFirst({ where: { OR: [{ slug }, { sku: raw.sku }] } });
+    if (existing) return NextResponse.json({ error: "Ce SKU ou slug est déjà utilisé par un autre produit." }, { status: 409 });
 
-  const product = await prisma.product.create({
-    data: {
-      ...data,
-      slug,
-      price: parseFloat(data.price),
-      compareAtPrice: data.compareAtPrice ? parseFloat(data.compareAtPrice) : null,
-      costPrice: data.costPrice ? parseFloat(data.costPrice) : null,
-      stock: parseInt(data.stock ?? "0"),
-      tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
-      images: {
-        create: images.map((url: string, i: number) => ({
-          url, sortOrder: i, isPrimary: i === 0,
-        })),
+    const product = await prisma.product.create({
+      data: {
+        name:             raw.name,
+        slug,
+        sku:              raw.sku,
+        shortDescription: raw.shortDescription || null,
+        description:      raw.description,
+        price:            parseFloat(raw.price),
+        compareAtPrice:   raw.compareAtPrice ? parseFloat(raw.compareAtPrice) : null,
+        costPrice:        raw.costPrice       ? parseFloat(raw.costPrice)      : null,
+        stock:            parseInt(raw.stock ?? "0") || 0,
+        categoryId:       raw.categoryId,
+        brandId:          raw.brandId || null,
+        isActive:         Boolean(raw.isActive ?? true),
+        isFeatured:       Boolean(raw.isFeatured),
+        isNew:            Boolean(raw.isNew),
+        isBestSeller:     Boolean(raw.isBestSeller),
+        tags:             Array.isArray(raw.tags) ? raw.tags : (raw.tags ? raw.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
+        metaTitle:        raw.metaTitle        || null,
+        metaDescription:  raw.metaDescription  || null,
+        images: {
+          create: (images as string[]).map((url, i) => ({
+            url, sortOrder: i, isPrimary: i === 0,
+          })),
+        },
+        attributes: {
+          create: (attributes as { name: string; value: string }[]).filter((a) => a.name && a.value),
+        },
       },
-      attributes: {
-        create: attributes.filter((a: any) => a.name && a.value),
-      },
-    },
-    include: { images: true, attributes: true, category: true },
-  });
+      include: { images: true, attributes: true, category: true },
+    });
 
-  return NextResponse.json(product, { status: 201 });
+    return NextResponse.json(product, { status: 201 });
+  } catch (error: any) {
+    console.error("[POST /api/products]", error);
+    const msg = error?.meta?.target
+      ? `Conflit : ${error.meta.target} déjà utilisé par un autre produit.`
+      : (error?.message ?? "Erreur lors de la création");
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

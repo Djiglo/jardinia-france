@@ -28,48 +28,66 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  try {
+    if (!await requireAdmin()) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
 
-  const { id } = await params;
-  const body = await req.json();
-  const { images, attributes, ...data } = body;
+    const { id } = await params;
+    const body = await req.json();
+    const { images, attributes, ...raw } = body;
 
-  if (!data.brandId) data.brandId = null;
-  // Auto-slug si le nom change
-  if (data.name && !data.slug) data.slug = slugify(data.name);
+    const updateData: Record<string, unknown> = {
+      name:             raw.name,
+      slug:             raw.slug || slugify(raw.name),
+      sku:              raw.sku,
+      shortDescription: raw.shortDescription || null,
+      description:      raw.description,
+      price:            parseFloat(raw.price),
+      compareAtPrice:   raw.compareAtPrice ? parseFloat(raw.compareAtPrice) : null,
+      costPrice:        raw.costPrice       ? parseFloat(raw.costPrice)      : null,
+      stock:            parseInt(raw.stock) || 0,
+      categoryId:       raw.categoryId,
+      brandId:          raw.brandId || null,
+      isActive:         Boolean(raw.isActive),
+      isFeatured:       Boolean(raw.isFeatured),
+      isNew:            Boolean(raw.isNew),
+      isBestSeller:     Boolean(raw.isBestSeller),
+      tags:             Array.isArray(raw.tags) ? raw.tags : (raw.tags ? raw.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
+      metaTitle:        raw.metaTitle        || null,
+      metaDescription:  raw.metaDescription  || null,
+    };
 
-  const product = await prisma.product.update({
-    where: { id },
-    data: {
-      ...data,
-      price: parseFloat(data.price),
-      compareAtPrice: data.compareAtPrice ? parseFloat(data.compareAtPrice) : null,
-      costPrice: data.costPrice ? parseFloat(data.costPrice) : null,
-      stock: parseInt(data.stock),
-      tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
-      // Mettre à jour les images
-      ...(images !== undefined && {
-        images: {
-          deleteMany: {},
-          create: images.map((url: string, i: number) => ({
-            url,
-            sortOrder: i,
-            isPrimary: i === 0,
-          })),
-        },
-      }),
-      // Mettre à jour les attributs
-      ...(attributes !== undefined && {
-        attributes: {
-          deleteMany: {},
-          create: attributes.filter((a: any) => a.name && a.value),
-        },
-      }),
-    },
-    include: { images: true, attributes: true, category: true },
-  });
+    if (images !== undefined) {
+      updateData.images = {
+        deleteMany: {},
+        create: (images as string[]).map((url, i) => ({
+          url,
+          sortOrder: i,
+          isPrimary: i === 0,
+        })),
+      };
+    }
 
-  return NextResponse.json(product);
+    if (attributes !== undefined) {
+      updateData.attributes = {
+        deleteMany: {},
+        create: (attributes as { name: string; value: string }[]).filter((a) => a.name && a.value),
+      };
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: updateData as any,
+      include: { images: true, attributes: true, category: true },
+    });
+
+    return NextResponse.json(product);
+  } catch (error: any) {
+    console.error("[PUT /api/products/:id]", error);
+    const msg = error?.meta?.target
+      ? `Conflit : ${error.meta.target} déjà utilisé par un autre produit.`
+      : (error?.message ?? "Erreur lors de la mise à jour");
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
