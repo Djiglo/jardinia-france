@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Edit, Package, Search } from "lucide-react";
+import { Plus, Edit, Package } from "lucide-react";
+import { Suspense } from "react";
+import ProductFilters from "./ProductFilters";
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string; search?: string }>;
@@ -48,30 +50,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       </div>
 
       {/* Filtres */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-5 flex flex-wrap gap-3">
-        <form className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            name="search"
-            defaultValue={search}
-            placeholder="Rechercher un produit..."
-            className="pl-9 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
-          />
-        </form>
-        <select
-          defaultValue={category}
-          onChange={(e) => {
-            const url = `/admin/produits?${e.target.value ? `category=${e.target.value}` : ""}`;
-            if (typeof window !== "undefined") window.location.href = url;
-          }}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
-        >
-          <option value="">Toutes les catégories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
-      </div>
+      <Suspense fallback={<div className="h-16 bg-white rounded-2xl border border-gray-100 mb-5 animate-pulse" />}>
+        <ProductFilters categories={categories} />
+      </Suspense>
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
