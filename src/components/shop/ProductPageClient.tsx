@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ShoppingCart, Heart, Star, Truck, Shield, RotateCcw,
   ChevronRight, ChevronLeft, Plus, Minus, Share2, Check, BadgeCheck,
+  ZoomIn, ZoomOut, X, Maximize2,
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
@@ -25,6 +26,20 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
   const [quantity, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
   const [justAdded, setJustAdded] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Close lightbox on Escape, navigate with arrow keys
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setLightboxOpen(false); setZoomLevel(1); }
+      if (e.key === "ArrowLeft") setSelectedImage((i) => (i - 1 + product.images.length) % product.images.length);
+      if (e.key === "ArrowRight") setSelectedImage((i) => (i + 1) % product.images.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen, product.images.length]);
 
   const { toggle: toggleWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
@@ -79,6 +94,97 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* ── Lightbox zoom ── */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col"
+          onClick={(e) => { if (e.target === e.currentTarget) { setLightboxOpen(false); setZoomLevel(1); } }}
+        >
+          {/* Barre de contrôles */}
+          <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+            <span className="text-white/60 text-sm">{selectedImage + 1} / {product.images.length}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setZoomLevel((z) => Math.max(1, +(z - 0.5).toFixed(1)))}
+                disabled={zoomLevel <= 1}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg disabled:opacity-30 transition-colors"
+                aria-label="Dézoomer"
+              >
+                <ZoomOut size={18} />
+              </button>
+              <span className="text-white text-sm w-12 text-center font-mono">{zoomLevel}×</span>
+              <button
+                onClick={() => setZoomLevel((z) => Math.min(4, +(z + 0.5).toFixed(1)))}
+                disabled={zoomLevel >= 4}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg disabled:opacity-30 transition-colors"
+                aria-label="Zoomer"
+              >
+                <ZoomIn size={18} />
+              </button>
+              <button
+                onClick={() => { setLightboxOpen(false); setZoomLevel(1); }}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors ml-2"
+                aria-label="Fermer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Image zoomée */}
+          <div className="flex-1 overflow-auto flex items-center justify-center">
+            <div
+              className="transition-transform duration-200 cursor-zoom-in"
+              style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
+              onClick={() => setZoomLevel((z) => z < 4 ? +(z + 0.5).toFixed(1) : 1)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={product.images[selectedImage]?.url ?? "/placeholder.svg"}
+                alt={product.images[selectedImage]?.alt ?? product.name}
+                className="max-h-[80vh] max-w-[90vw] object-contain select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
+
+          {/* Flèches navigation dans le lightbox */}
+          {product.images.length > 1 && (
+            <>
+              <button
+                onClick={() => { setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length); setZoomLevel(1); }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/25 text-white rounded-full transition-colors"
+                aria-label="Photo précédente"
+              >
+                <ChevronLeft size={28} />
+              </button>
+              <button
+                onClick={() => { setSelectedImage((selectedImage + 1) % product.images.length); setZoomLevel(1); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/25 text-white rounded-full transition-colors"
+                aria-label="Photo suivante"
+              >
+                <ChevronRight size={28} />
+              </button>
+            </>
+          )}
+
+          {/* Miniatures en bas */}
+          {product.images.length > 1 && (
+            <div className="flex justify-center gap-2 py-3 flex-shrink-0 overflow-x-auto px-4">
+              {product.images.map((img: any, i: number) => (
+                <button
+                  key={img.id}
+                  onClick={() => { setSelectedImage(i); setZoomLevel(1); }}
+                  className={`w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${i === selectedImage ? "border-primary-400 opacity-100" : "border-transparent opacity-50 hover:opacity-80"}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-8">
         <Link href="/" className="hover:text-primary-600 transition-colors">Accueil</Link>
@@ -116,6 +222,15 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 Nouveau
               </span>
             )}
+            {/* Bouton loupe */}
+            <button
+              onClick={() => { setLightboxOpen(true); setZoomLevel(1); }}
+              className="absolute top-3 right-3 z-10 p-2 bg-white/80 hover:bg-white text-anthracite-700 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Agrandir l'image"
+            >
+              <Maximize2 size={16} />
+            </button>
+
             {product.images.length > 1 && (
               <>
                 <button
