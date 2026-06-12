@@ -4,13 +4,17 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle, Package, Home } from "lucide-react";
 import { useCartStore } from "@/store/cart";
+import { useSession } from "next-auth/react";
 
 export default function CheckoutSuccessPage() {
   const clearCart = useCartStore((s) => s.clearCart);
+  const { data: session } = useSession();
 
   useEffect(() => {
     clearCart();
   }, [clearCart]);
+
+  const isLoggedIn = !!session?.user;
 
   return (
     <div className="container mx-auto px-4 py-20 text-center max-w-md">
@@ -25,8 +29,18 @@ export default function CheckoutSuccessPage() {
         <p className="text-sm text-gray-400 mb-8">
           Votre commande sera expédiée dans les meilleurs délais.
         </p>
+
+        {!isLoggedIn && (
+          <p className="text-xs text-primary-600 bg-primary-50 rounded-xl p-3 mb-4">
+            Votre numéro de commande se trouve dans l&apos;e-mail de confirmation.
+          </p>
+        )}
+
         <div className="flex flex-col gap-3">
-          <Link href="/compte/commandes" className="btn-primary flex items-center justify-center gap-2">
+          <Link
+            href={isLoggedIn ? "/compte/commandes" : "/suivi-commande"}
+            className="btn-primary flex items-center justify-center gap-2"
+          >
             <Package size={18} />
             Suivre ma commande
           </Link>
