@@ -125,9 +125,10 @@ export async function POST(req: Request) {
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
     console.error("[POST /api/products]", error);
-    const msg = error?.meta?.target
-      ? `Conflit : ${error.meta.target} déjà utilisé par un autre produit.`
-      : (error?.message ?? "Erreur lors de la création");
-    return NextResponse.json({ error: msg }, { status: 500 });
+    if (error?.code === "P2002") {
+      const field = error?.meta?.target ?? "champ";
+      return NextResponse.json({ error: `Conflit : ${field} déjà utilisé par un autre produit.` }, { status: 409 });
+    }
+    return NextResponse.json({ error: error?.message ?? "Erreur lors de la création" }, { status: 500 });
   }
 }

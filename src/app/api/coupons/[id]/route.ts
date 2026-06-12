@@ -18,6 +18,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const body = await req.json();
   const { code, type, value, minOrderAmount, maxDiscount, usageLimit, isActive, expiresAt } = body;
 
+  if (!code || typeof code !== "string" || !code.trim())
+    return NextResponse.json({ error: "Code requis" }, { status: 400 });
+  if (!["percentage", "fixed", "free_shipping"].includes(type))
+    return NextResponse.json({ error: "Type invalide" }, { status: 400 });
+  const parsedValue = parseFloat(value);
+  if (isNaN(parsedValue) || parsedValue <= 0)
+    return NextResponse.json({ error: "Valeur invalide" }, { status: 400 });
+  if (type === "percentage" && parsedValue > 100)
+    return NextResponse.json({ error: "Pourcentage ne peut pas dépasser 100%" }, { status: 400 });
+  if (usageLimit !== undefined && usageLimit !== null) {
+    const parsedLimit = parseInt(usageLimit);
+    if (isNaN(parsedLimit) || parsedLimit < 1)
+      return NextResponse.json({ error: "Limite d'utilisation invalide" }, { status: 400 });
+  }
+
   const coupon = await prisma.coupon.update({
     where: { id },
     data: {

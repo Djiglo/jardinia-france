@@ -95,8 +95,9 @@ export default function ProductCard({ product, className }: ProductCardProps) {
             </button>
             <button
               className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:text-primary-600 transition-colors"
-              onClick={(e) => { e.preventDefault(); window.location.href = `/boutique/produit/${product.slug}`; }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
               aria-label="Voir le produit"
+              tabIndex={-1}
             >
               <Eye size={16} />
             </button>

@@ -13,6 +13,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const session = await auth();
   const { id } = await params;
 
+  if (!session?.user?.id) redirect(`/auth/connexion?callbackUrl=/compte/commandes/${id}`);
+
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
@@ -20,8 +22,6 @@ export default async function OrderDetailPage({ params }: Props) {
       history: { orderBy: { createdAt: "asc" } },
     },
   });
-
-  if (!session?.user?.id) redirect(`/auth/connexion?callbackUrl=/compte/commandes/${id}`);
   if (!order || order.userId !== session.user.id) notFound();
 
   const address = order.shippingAddress as any;

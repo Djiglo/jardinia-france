@@ -7,6 +7,8 @@ export async function POST(req: Request) {
     const { name, email, subject, message } = await req.json();
     if (!name || !email || !message)
       return NextResponse.json({ error: "Champs requis" }, { status: 400 });
+    if (typeof message !== "string" || message.length > 5000)
+      return NextResponse.json({ error: "Message trop long (5000 caractères max)" }, { status: 400 });
 
     const sanitize = (s: string) => String(s).replace(/[\r\n]/g, " ").trim();
     const safeName    = sanitize(name);

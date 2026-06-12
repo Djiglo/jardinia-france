@@ -124,6 +124,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("[DELETE /api/products/:id]", error);
-    return NextResponse.json({ error: error.message ?? "Erreur suppression" }, { status: 500 });
+    if (error?.code === "P2025") return NextResponse.json({ error: "Produit introuvable" }, { status: 404 });
+    return NextResponse.json({ error: "Erreur lors de la suppression" }, { status: 500 });
   }
 }

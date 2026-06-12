@@ -10,6 +10,11 @@ export async function POST(req: Request) {
   const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
   if (existing) return NextResponse.json({ message: "Déjà inscrit" });
 
-  await prisma.newsletterSubscriber.create({ data: { email } });
+  try {
+    await prisma.newsletterSubscriber.create({ data: { email } });
+  } catch (err: any) {
+    if (err?.code === "P2002") return NextResponse.json({ message: "Déjà inscrit" });
+    throw err;
+  }
   return NextResponse.json({ message: "Inscription réussie !" }, { status: 201 });
 }

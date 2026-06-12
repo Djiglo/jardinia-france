@@ -96,12 +96,12 @@ async function getAnalytics() {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  PENDING: "En attente", CONFIRMED: "Confirmée", SHIPPED: "Expédiée",
-  DELIVERED: "Livrée", CANCELLED: "Annulée", REFUNDED: "Remboursée",
+  PENDING: "En attente", CONFIRMED: "Confirmée", PROCESSING: "En préparation",
+  SHIPPED: "Expédiée", DELIVERED: "Livrée", CANCELLED: "Annulée", REFUNDED: "Remboursée",
 };
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-400", CONFIRMED: "bg-blue-400", SHIPPED: "bg-purple-400",
-  DELIVERED: "bg-green-400", CANCELLED: "bg-red-400", REFUNDED: "bg-gray-400",
+  PENDING: "bg-yellow-400", CONFIRMED: "bg-blue-400", PROCESSING: "bg-orange-400",
+  SHIPPED: "bg-purple-400", DELIVERED: "bg-green-400", CANCELLED: "bg-red-400", REFUNDED: "bg-gray-400",
 };
 
 export default async function AdminAnalyticsPage() {

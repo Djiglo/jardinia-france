@@ -148,20 +148,37 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           <p className="text-gray-500">
             {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, total)} sur {total} utilisateurs
           </p>
-          <div className="flex gap-1">
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
-              <Link
-                key={p}
-                href={`/admin/utilisateurs?page=${p}${role ? `&role=${role}` : ""}${search ? `&search=${search}` : ""}`}
-                className={`px-3 py-1.5 rounded-lg border transition-colors ${
-                  p === currentPage
-                    ? "bg-primary-600 text-white border-primary-600"
-                    : "border-gray-200 hover:border-gray-300 text-gray-600"
-                }`}
-              >
-                {p}
-              </Link>
-            ))}
+          <div className="flex gap-1 flex-wrap">
+            {currentPage > 1 && (
+              <Link href={`/admin/utilisateurs?page=${currentPage - 1}${role ? `&role=${role}` : ""}${search ? `&search=${search}` : ""}`} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:border-gray-300 text-gray-600">‹</Link>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+              .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === "..." ? (
+                  <span key={`ellipsis-${i}`} className="px-3 py-1.5 text-gray-400">…</span>
+                ) : (
+                  <Link
+                    key={p}
+                    href={`/admin/utilisateurs?page=${p}${role ? `&role=${role}` : ""}${search ? `&search=${search}` : ""}`}
+                    className={`px-3 py-1.5 rounded-lg border transition-colors ${
+                      p === currentPage
+                        ? "bg-primary-600 text-white border-primary-600"
+                        : "border-gray-200 hover:border-gray-300 text-gray-600"
+                    }`}
+                  >
+                    {p}
+                  </Link>
+                )
+              )}
+            {currentPage < totalPages && (
+              <Link href={`/admin/utilisateurs?page=${currentPage + 1}${role ? `&role=${role}` : ""}${search ? `&search=${search}` : ""}`} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:border-gray-300 text-gray-600">›</Link>
+            )}
           </div>
         </div>
       )}

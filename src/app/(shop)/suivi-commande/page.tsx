@@ -27,7 +27,7 @@ export default function SuiviCommandePage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/orders/track?orderNumber=${orderNumber}&email=${email}`);
+      const res = await fetch(`/api/orders/track?orderNumber=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`);
       const data = await res.json();
 
       if (!res.ok || !data.order) {
@@ -55,10 +55,11 @@ export default function SuiviCommandePage() {
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="track-orderNumber" className="block text-sm font-medium text-gray-700 mb-1">
               Numéro de commande
             </label>
             <input
+              id="track-orderNumber"
               type="text"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
@@ -68,15 +69,17 @@ export default function SuiviCommandePage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="track-email" className="block text-sm font-medium text-gray-700 mb-1">
               Adresse e-mail
             </label>
             <input
+              id="track-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
               required
+              autoComplete="email"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
             />
           </div>

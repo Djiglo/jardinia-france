@@ -9,7 +9,7 @@ interface Props {
 
 export default async function AdminOrdersPage({ searchParams }: Props) {
   const { page = "1", status = "", search = "" } = await searchParams;
-  const currentPage = parseInt(page);
+  const currentPage = Math.max(1, parseInt(page) || 1);
   const perPage = 20;
 
   const where: any = {};
@@ -76,7 +76,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
           </form>
         </div>
         <div className="flex gap-1.5 flex-wrap">
-          {["", "PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].map((s) => (
+          {["", "PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"].map((s) => (
             <Link
               key={s}
               href={`/admin/commandes?${s ? `status=${s}` : ""}${search ? `&search=${search}` : ""}`}
