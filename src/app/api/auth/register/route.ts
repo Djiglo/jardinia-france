@@ -3,6 +3,15 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/email";
 
+function generateWelcomeCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "BIENV-";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
@@ -24,8 +33,34 @@ export async function POST(req: Request) {
       data: { name, email, password: hashed, role: "CUSTOMER" },
     });
 
-    // E-mail de bienvenue (non bloquant)
-    sendWelcomeEmail({ to: email, firstName: name }).catch(console.error);
+    // Créer un coupon de bienvenue unique, usage unique, valable 30 jours
+    let welcomeCode: string | null = null;
+    try {
+      let code = generateWelcomeCode();
+      // Éviter les collisions (très improbables)
+      const maxAttempts = 5;
+      for (let i = 0; i < maxAttempts; i++) {
+        const exists = await prisma.coupon.findUnique({ where: { code } });
+        if (!exists) break;
+        code = generateWelcomeCode();
+      }
+      await prisma.coupon.create({
+        data: {
+          code,
+          type: "PERCENTAGE",
+          value: 20,
+          minOrderAmount: 100,
+          isActive: true,
+          usageLimit: 1,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      });
+      welcomeCode = code;
+    } catch {
+      // Non bloquant — l'inscription réussit même sans coupon
+    }
+
+    sendWelcomeEmail({ to: email, firstName: name, welcomeCode }).catch(console.error);
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch (error) {

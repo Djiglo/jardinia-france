@@ -123,21 +123,29 @@ export async function sendOrderConfirmationEmail({
 export async function sendWelcomeEmail({
   to,
   firstName,
+  welcomeCode,
 }: {
   to: string;
   firstName: string;
+  welcomeCode?: string | null;
 }) {
+  const couponBlock = welcomeCode
+    ? `<div style="background:#f0fdf4;padding:24px;border-radius:8px;margin:24px 0;border:1px solid #bbf7d0;">
+      <h3 style="color:${brandColor};margin:0 0 8px;">🎁 Votre cadeau de bienvenue</h3>
+      <p style="margin:0 0 12px;color:#374151;">Profitez de <strong>20% de réduction</strong> sur votre première commande dès 100&nbsp;€ d'achats avec le code :</p>
+      <div style="text-align:center;background:#ffffff;border:2px dashed ${brandColor};border-radius:8px;padding:14px;font-size:22px;font-weight:bold;letter-spacing:3px;color:${brandColor};">${welcomeCode}</div>
+      <p style="margin:12px 0 0;color:#6b7280;font-size:12px;text-align:center;">Valable 30 jours · Usage unique · Commande min. 100&nbsp;€</p>
+    </div>`
+    : "";
+
   const content = `
-    <h2 style="color:#111827;">Bienvenue chez ${brandName}, ${firstName} ! 🌿</h2>
+    <h2 style="color:#111827;">Bienvenue chez ${brandName}, ${firstName}&nbsp;! 🌿</h2>
     <p style="color:#4b5563;line-height:1.6;">
       Votre compte a été créé avec succès. Vous pouvez maintenant profiter de toutes nos offres pour aménager votre extérieur.
     </p>
-    
-    <div style="background:#f0fdf4;padding:24px;border-radius:8px;margin:24px 0;">
-      <h3 style="color:${brandColor};margin:0 0 12px;">🎁 Cadeau de bienvenue</h3>
-      <p style="margin:0;color:#374151;">Utilisez le code <strong>BIENVENUE20</strong> pour obtenir <strong>20% de réduction</strong> sur votre première commande dès 100€ d'achats.</p>
-    </div>
-    
+
+    ${couponBlock}
+
     <div style="text-align:center;margin-top:32px;">
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/boutique"
          style="background:${brandColor};color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">

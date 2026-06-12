@@ -856,15 +856,14 @@ async function main() {
   });
   await prisma.coupon.upsert({
     where: { code: "BIENVENUE20" },
-    update: {},
+    update: { isActive: true, expiresAt: null },
     create: {
       code: "BIENVENUE20",
       type: "PERCENTAGE",
       value: 20,
       minOrderAmount: 100,
       isActive: true,
-      usageLimit: 500,
-      expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      usageLimit: null,
     },
   });
   await prisma.coupon.upsert({
