@@ -40,6 +40,7 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
 
     const address = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
     const userId = session.metadata?.userId || null;
+    const couponDbId = session.metadata?.couponDbId || null;
 
     const subtotal    = (session.amount_subtotal ?? 0) / 100;
     const shippingCost = (session.total_details?.amount_shipping ?? 0) / 100;
@@ -50,6 +51,7 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
       data: {
         orderNumber:    generateOrderNumber(),
         userId,
+        couponId:       couponDbId,
         status:         "CONFIRMED",
         paymentStatus:  "PAID",
         paymentMethod:  "stripe",
@@ -102,6 +104,14 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
           data: { stock: { decrement: item.quantity ?? 1 } },
         }).catch(console.error);
       }
+    }
+
+    // Increment coupon usage
+    if (couponDbId) {
+      await prisma.coupon.update({
+        where: { id: couponDbId },
+        data: { usageCount: { increment: 1 } },
+      }).catch(console.error);
     }
 
     console.log(`✅ Order ${order.orderNumber} created for ${session.customer_email}`);

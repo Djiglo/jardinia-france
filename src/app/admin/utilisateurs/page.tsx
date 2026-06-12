@@ -39,8 +39,8 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const totalPages = Math.ceil(total / perPage);
 
   const roleBadge = (r: string) => {
+    if (r === "SUPER_ADMIN") return <span className="badge bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">Super Admin</span>;
     if (r === "ADMIN") return <span className="badge bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">Admin</span>;
-    if (r === "MANAGER") return <span className="badge bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full">Manager</span>;
     return <span className="badge bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">Client</span>;
   };
 
@@ -68,8 +68,8 @@ export default async function AdminUsersPage({ searchParams }: Props) {
         <select name="role" defaultValue={role} className="input text-sm w-40">
           <option value="">Tous les rôles</option>
           <option value="CUSTOMER">Client</option>
-          <option value="MANAGER">Manager</option>
           <option value="ADMIN">Admin</option>
+          <option value="SUPER_ADMIN">Super Admin</option>
         </select>
         <button type="submit" className="btn-primary text-sm px-4">Filtrer</button>
         {(search || role) && (

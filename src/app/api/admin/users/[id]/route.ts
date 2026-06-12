@@ -7,7 +7,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
@@ -17,7 +17,7 @@ export async function PATCH(
 
   const data: any = {};
   if (typeof isActive === "boolean") data.isActive = isActive;
-  if (role && ["CUSTOMER", "MANAGER", "ADMIN"].includes(role)) data.role = role;
+  if (role && ["CUSTOMER", "ADMIN"].includes(role)) data.role = role;
 
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "Aucune modification" }, { status: 400 });

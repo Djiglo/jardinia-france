@@ -42,7 +42,8 @@ export async function createStripeCheckoutSession({
   customerEmail,
   orderId,
   shippingCost,
-  couponCode,
+  discountAmountCents = 0,
+  couponDbId,
   successUrl,
   cancelUrl,
   userId,
@@ -52,7 +53,8 @@ export async function createStripeCheckoutSession({
   customerEmail: string;
   orderId: string;
   shippingCost: number;
-  couponCode?: string;
+  discountAmountCents?: number;
+  couponDbId?: string;
   successUrl: string;
   cancelUrl: string;
   userId?: string;
@@ -73,6 +75,17 @@ export async function createStripeCheckoutSession({
     })
   );
 
+  // Create a one-time Stripe coupon if a discount applies
+  let stripeCouponId: string | undefined;
+  if (discountAmountCents > 0) {
+    const stripeCoupon = await stripe.coupons.create({
+      amount_off: discountAmountCents,
+      currency: "eur",
+      duration: "once",
+    });
+    stripeCouponId = stripeCoupon.id;
+  }
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card", "paypal"],
     mode: "payment",
@@ -87,9 +100,10 @@ export async function createStripeCheckoutSession({
         },
       },
     ],
+    ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
     metadata: {
       orderId,
-      couponCode: couponCode ?? "",
+      couponDbId: couponDbId ?? "",
       userId: userId ?? "",
       address: addressJson ?? "",
     },

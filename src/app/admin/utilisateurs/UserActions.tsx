@@ -60,13 +60,22 @@ export default function UserActions({ userId, isActive, role }: Props) {
                 <><UserCheck size={14} className="text-green-500" /> Réactiver</>
               )}
             </button>
-            {role !== "ADMIN" && (
+            {role === "CUSTOMER" && (
               <button
-                onClick={() => patch({ role: role === "MANAGER" ? "CUSTOMER" : "MANAGER" })}
+                onClick={() => patch({ role: "ADMIN" })}
                 className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 text-left"
               >
                 <Shield size={14} className="text-orange-500" />
-                {role === "MANAGER" ? "Rétrograder client" : "Promouvoir manager"}
+                Promouvoir admin
+              </button>
+            )}
+            {role === "ADMIN" && (
+              <button
+                onClick={() => patch({ role: "CUSTOMER" })}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 text-left"
+              >
+                <Shield size={14} className="text-gray-400" />
+                Rétrograder client
               </button>
             )}
           </div>
