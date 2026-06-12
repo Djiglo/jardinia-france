@@ -28,8 +28,11 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const { items, subtotal, coupon, clearCart } = useCartStore();
 
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<Step>("address");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const [address, setAddress] = useState({
     firstName: "", lastName: "", email: session?.user?.email ?? "",
@@ -46,8 +49,16 @@ export default function CheckoutPage() {
   const total = subtotal - discountAmount + shippingCost;
 
   useEffect(() => {
-    if (items.length === 0) router.push("/panier");
-  }, [items, router]);
+    if (mounted && items.length === 0) router.push("/panier");
+  }, [mounted, items, router]);
+
+  if (!mounted || items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-24 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto" />
+      </div>
+    );
+  }
 
   const stepIndex = STEPS.findIndex((s) => s.key === step);
 

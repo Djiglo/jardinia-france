@@ -12,12 +12,12 @@ export default function MentionsLegalesPage() {
           <p>Jardinia France — Auto-entrepreneur<br />
           Siège social : Île-de-France, France<br />
           E-mail : contact@jardinia-france.fr<br />
-          Directeur de publication : [Nom du responsable]</p>
+          Directeur de publication : B. Hedhiri</p>
         </section>
         <section>
           <h2 className="text-base font-semibold text-anthracite-800 mb-2">Hébergement</h2>
-          <p>Le site est hébergé par [Nom de l'hébergeur], [Adresse], [Pays].<br />
-          Téléphone : [Numéro]</p>
+          <p>Le site est hébergé par Vercel Inc., 340 Pine Street, Suite 700, San Francisco, CA 94104, États-Unis.<br />
+          Site : <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">vercel.com</a></p>
         </section>
         <section>
           <h2 className="text-base font-semibold text-anthracite-800 mb-2">Propriété intellectuelle</h2>
@@ -29,7 +29,7 @@ export default function MentionsLegalesPage() {
         </section>
         <section>
           <h2 className="text-base font-semibold text-anthracite-800 mb-2">Cookies</h2>
-          <p>Ce site utilise des cookies à des fins fonctionnelles et analytiques. Pour en savoir plus, consultez notre <a href="/politique-cookies" className="text-primary-600 hover:underline">politique de cookies</a>.</p>
+          <p>Ce site utilise des cookies à des fins fonctionnelles et analytiques. Pour en savoir plus, consultez notre <a href="/cookies" className="text-primary-600 hover:underline">politique de cookies</a>.</p>
         </section>
       </div>
     </div>
