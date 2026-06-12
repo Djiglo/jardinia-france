@@ -23,7 +23,7 @@ interface CartStore {
   coupon: AppliedCoupon | null;
   shippingMethod: "standard" | "express";
 
-  // Computed
+  // Derived (recomputed on every mutation)
   itemCount: number;
   subtotal: number;
   shippingCost: number;
@@ -50,91 +50,105 @@ function computeDiscount(coupon: AppliedCoupon | null, subtotal: number): number
   return coupon.discount;
 }
 
+function recalc(
+  items: LocalCartItem[],
+  coupon: AppliedCoupon | null,
+  shippingMethod: "standard" | "express"
+): { itemCount: number; subtotal: number; shippingCost: number; total: number } {
+  const subtotal = items.reduce((acc, item) => {
+    const price =
+      item.variant?.price != null
+        ? Number(item.variant.price)
+        : Number(item.product.price);
+    return acc + price * item.quantity;
+  }, 0);
+
+  const base = calculateShipping(subtotal, shippingMethod);
+  const shippingCost = coupon?.type === "free_shipping" ? 0 : base;
+  const disc = computeDiscount(coupon, subtotal);
+  const total = Math.max(0, subtotal + shippingCost - disc);
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+
+  return { itemCount, subtotal, shippingCost, total };
+}
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
       coupon: null,
       shippingMethod: "standard",
-
-      get itemCount() {
-        return get().items.reduce((acc, item) => acc + item.quantity, 0);
-      },
-
-      get subtotal() {
-        return get().items.reduce((acc, item) => {
-          const price =
-            item.variant?.price !== null && item.variant?.price !== undefined
-              ? item.variant.price
-              : item.product.price;
-          return acc + price * item.quantity;
-        }, 0);
-      },
-
-      get shippingCost() {
-        const s = get();
-        const base = calculateShipping(s.subtotal, s.shippingMethod);
-        return s.coupon?.type === "free_shipping" ? 0 : base;
-      },
-
-      get total() {
-        const s = get();
-        const disc = computeDiscount(s.coupon, s.subtotal);
-        return Math.max(0, s.subtotal + s.shippingCost - disc);
-      },
+      itemCount: 0,
+      subtotal: 0,
+      shippingCost: calculateShipping(0, "standard"),
+      total: calculateShipping(0, "standard"),
 
       addItem(product, variant = null, qty = 1) {
-        const itemId = makeItemId(product.id, variant?.id ?? null);
         set((state) => {
+          const itemId = makeItemId(product.id, variant?.id ?? null);
           const existing = state.items.find((i) => i.id === itemId);
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
+          const newItems: LocalCartItem[] = existing
+            ? state.items.map((i) =>
                 i.id === itemId ? { ...i, quantity: i.quantity + qty } : i
-              ),
-            };
-          }
-          return {
-            items: [
-              ...state.items,
-              {
-                id: itemId,
-                productId: product.id,
-                variantId: variant?.id ?? null,
-                quantity: qty,
-                product,
-                variant: variant ?? null,
-              },
-            ],
-          };
+              )
+            : [
+                ...state.items,
+                {
+                  id: itemId,
+                  productId: product.id,
+                  variantId: variant?.id ?? null,
+                  quantity: qty,
+                  product,
+                  variant: variant ?? null,
+                },
+              ];
+          return { items: newItems, ...recalc(newItems, state.coupon, state.shippingMethod) };
         });
       },
 
       removeItem(itemId) {
-        set((state) => ({ items: state.items.filter((i) => i.id !== itemId) }));
+        set((state) => {
+          const newItems = state.items.filter((i) => i.id !== itemId);
+          return { items: newItems, ...recalc(newItems, state.coupon, state.shippingMethod) };
+        });
       },
 
       updateQuantity(itemId, quantity) {
-        if (quantity <= 0) { get().removeItem(itemId); return; }
-        set((state) => ({
-          items: state.items.map((i) => i.id === itemId ? { ...i, quantity } : i),
-        }));
+        if (quantity <= 0) {
+          get().removeItem(itemId);
+          return;
+        }
+        set((state) => {
+          const newItems = state.items.map((i) =>
+            i.id === itemId ? { ...i, quantity } : i
+          );
+          return { items: newItems, ...recalc(newItems, state.coupon, state.shippingMethod) };
+        });
       },
 
       clearCart() {
-        set({ items: [], coupon: null });
+        set({ items: [], coupon: null, ...recalc([], null, get().shippingMethod) });
       },
 
       setCoupon(coupon) {
-        set({ coupon });
+        set((state) => ({
+          coupon,
+          ...recalc(state.items, coupon, state.shippingMethod),
+        }));
       },
 
       removeCoupon() {
-        set({ coupon: null });
+        set((state) => ({
+          coupon: null,
+          ...recalc(state.items, null, state.shippingMethod),
+        }));
       },
 
       setShippingMethod(method) {
-        set({ shippingMethod: method });
+        set((state) => ({
+          shippingMethod: method,
+          ...recalc(state.items, state.coupon, method),
+        }));
       },
     }),
     {
@@ -144,6 +158,15 @@ export const useCartStore = create<CartStore>()(
         coupon: state.coupon,
         shippingMethod: state.shippingMethod,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const derived = recalc(state.items, state.coupon, state.shippingMethod);
+          state.itemCount = derived.itemCount;
+          state.subtotal = derived.subtotal;
+          state.shippingCost = derived.shippingCost;
+          state.total = derived.total;
+        }
+      },
     }
   )
 );
