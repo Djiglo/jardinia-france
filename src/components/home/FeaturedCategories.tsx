@@ -42,11 +42,11 @@ const categories = [
     emoji: "🔧",
   },
   {
-    name: "Décoration & Éclairage",
-    href: "/boutique/decoration-exterieure",
+    name: "Pergolas",
+    href: "/boutique/pergolas",
     image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500&q=80",
     count: "20 produits",
-    emoji: "✨",
+    emoji: "🏡",
   },
 ];
 

@@ -69,11 +69,11 @@ const navCategories = [
     ],
   },
   {
-    label: "Décoration",
-    href: "/boutique/decoration-exterieure",
+    label: "Pergolas",
+    href: "/boutique/pergolas",
     children: [
-      { label: "Éclairage extérieur", href: "/boutique/eclairage-exterieur" },
-      { label: "Décoration & Accessoires", href: "/boutique/decoration-exterieure" },
+      { label: "Pergolas bioclimatiques", href: "/boutique/pergolas?type=bioclimatique" },
+      { label: "Pergolas & Abris de jardin", href: "/boutique/pergolas" },
     ],
   },
 ];

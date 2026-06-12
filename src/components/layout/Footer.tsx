@@ -24,7 +24,7 @@ const footerLinks = {
       { label: "Barbecues", href: "/boutique/barbecues" },
       { label: "Tondeuses & Gazon", href: "/boutique/tondeuses-gazon" },
       { label: "Outils de jardin", href: "/boutique/outils-jardin" },
-      { label: "Décoration extérieure", href: "/boutique/decoration-exterieure" },
+      { label: "Pergolas", href: "/boutique/pergolas" },
     ],
   },
   account: {

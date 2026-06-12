@@ -48,7 +48,7 @@ export default function AboutPage() {
           Fondée en 2024 par des passionnés de jardin et d'aménagement extérieur, notre boutique en ligne s'est donnée pour mission de vous offrir les meilleurs produits aux meilleurs prix.
         </p>
         <p className="text-gray-600 leading-relaxed mb-4">
-          Que vous soyez propriétaire d'un grand jardin, locataire avec un balcon, ou professionnel du paysagisme, nous avons sélectionné pour vous une gamme complète de produits : mobilier de jardin, piscines, barbecues, outillage, décoration extérieure et bien plus encore.
+          Que vous soyez propriétaire d'un grand jardin, locataire avec un balcon, ou professionnel du paysagisme, nous avons sélectionné pour vous une gamme complète de produits : mobilier de jardin, piscines, barbecues, outillage, pergolas et bien plus encore.
         </p>
         <p className="text-gray-600 leading-relaxed">
           Notre engagement ? Vous proposer une expérience d'achat fluide, des produits de qualité, et un service client réactif. La livraison est gratuite dès 79€ et nous livrons dans toute l'Europe.

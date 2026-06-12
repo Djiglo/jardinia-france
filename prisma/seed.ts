@@ -139,12 +139,12 @@ async function main() {
   });
 
   const catDecoration = await prisma.category.upsert({
-    where: { slug: "decoration-exterieure" },
+    where: { slug: "pergolas" },
     update: {},
     create: {
-      name: "Décoration extérieure",
-      slug: "decoration-exterieure",
-      description: "Éclairage, déco et accessoires pour votre extérieur",
+      name: "Pergolas",
+      slug: "pergolas",
+      description: "Pergolas, abris de jardin et structures extérieures",
       image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400",
       sortOrder: 6,
     },

@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | Jardinia France",
   },
   description:
-    "Spécialiste des produits de jardin, piscines et mobilier extérieur. Livraison dans toute l'Europe. Piscines, barbecues, tondeuses, mobilier de jardin et décoration extérieure.",
+    "Spécialiste des produits de jardin, piscines et mobilier extérieur. Livraison dans toute l'Europe. Piscines, barbecues, tondeuses, mobilier de jardin et pergolas.",
   keywords: [
     "jardin",
     "piscine",
