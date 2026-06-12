@@ -15,8 +15,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const addr = await checkOwnership(id, session.user.id!);
   if (!addr) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
-  const data = await req.json();
-  const updated = await prisma.address.update({ where: { id }, data });
+  const body = await req.json();
+  const { firstName, lastName, address1, address2, city, postalCode, country, phone } = body;
+
+  // Whitelist des champs — jamais de spread direct vers Prisma
+  const updated = await prisma.address.update({
+    where: { id },
+    data: {
+      firstName,
+      lastName,
+      address1,
+      address2: address2 ?? null,
+      city,
+      postalCode,
+      country:  country ?? "FR",
+      phone:    phone ?? null,
+    },
+  });
   return NextResponse.json(updated);
 }
 

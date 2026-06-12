@@ -6,14 +6,26 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-  const data = await req.json();
-  const { firstName, lastName, address1, city, postalCode } = data;
+  const body = await req.json();
+  const { firstName, lastName, address1, address2, city, postalCode, country, phone } = body;
+
   if (!firstName || !lastName || !address1 || !city || !postalCode) {
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
   }
 
+  // Whitelist des champs — jamais de spread direct vers Prisma
   const address = await prisma.address.create({
-    data: { ...data, userId: session.user.id! },
+    data: {
+      firstName,
+      lastName,
+      address1,
+      address2: address2 ?? null,
+      city,
+      postalCode,
+      country:  country ?? "FR",
+      phone:    phone ?? null,
+      userId:   session.user.id!,
+    },
   });
 
   return NextResponse.json(address, { status: 201 });

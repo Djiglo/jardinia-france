@@ -34,12 +34,22 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   const totalPages = Math.ceil(total / perPage);
 
   const STATUS_COLORS: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-700", CONFIRMED: "bg-blue-100 text-blue-700",
-    SHIPPED: "bg-purple-100 text-purple-700", DELIVERED: "bg-green-100 text-green-700",
-    CANCELLED: "bg-red-100 text-red-700",
+    PENDING:    "bg-yellow-100 text-yellow-700",
+    CONFIRMED:  "bg-blue-100 text-blue-700",
+    PROCESSING: "bg-orange-100 text-orange-700",
+    SHIPPED:    "bg-purple-100 text-purple-700",
+    DELIVERED:  "bg-green-100 text-green-700",
+    CANCELLED:  "bg-red-100 text-red-700",
+    REFUNDED:   "bg-gray-100 text-gray-600",
   };
   const STATUS_LABELS: Record<string, string> = {
-    PENDING: "En attente", CONFIRMED: "Confirmée", SHIPPED: "Expédiée", DELIVERED: "Livrée", CANCELLED: "Annulée",
+    PENDING:    "En attente",
+    CONFIRMED:  "Confirmée",
+    PROCESSING: "En préparation",
+    SHIPPED:    "Expédiée",
+    DELIVERED:  "Livrée",
+    CANCELLED:  "Annulée",
+    REFUNDED:   "Remboursée",
   };
 
   return (

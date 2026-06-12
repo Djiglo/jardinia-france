@@ -9,6 +9,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const userId = session.user.id!;
 
+  // Vérifier que l'adresse appartient bien à cet utilisateur
+  const owned = await prisma.address.findFirst({ where: { id, userId } });
+  if (!owned) return NextResponse.json({ error: "Adresse introuvable" }, { status: 404 });
+
   await prisma.$transaction([
     prisma.address.updateMany({ where: { userId }, data: { isDefault: false } }),
     prisma.address.update({ where: { id }, data: { isDefault: true } }),

@@ -4,17 +4,21 @@ import { prisma } from "@/lib/prisma";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://jardinia-france.fr";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Dates fixes pour les pages statiques — évite de signaler une MAJ à chaque build
+  const SITE_LAUNCH = new Date("2024-06-01");
+  const LEGAL_DATE  = new Date("2024-01-01");
+
   const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
-    { url: `${BASE_URL}/boutique`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE_URL}/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE_URL}/a-propos`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE_URL}/livraison`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE_URL}/cgv`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE_URL}/mentions-legales`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE_URL}/confidentialite`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE_URL}/cookies`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: BASE_URL,                          lastModified: SITE_LAUNCH,  changeFrequency: "daily",   priority: 1   },
+    { url: `${BASE_URL}/boutique`,            lastModified: SITE_LAUNCH,  changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE_URL}/faq`,                 lastModified: LEGAL_DATE,   changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/contact`,             lastModified: LEGAL_DATE,   changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/a-propos`,            lastModified: LEGAL_DATE,   changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE_URL}/livraison`,           lastModified: LEGAL_DATE,   changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE_URL}/cgv`,                 lastModified: LEGAL_DATE,   changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE_URL}/mentions-legales`,    lastModified: LEGAL_DATE,   changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE_URL}/confidentialite`,     lastModified: LEGAL_DATE,   changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE_URL}/cookies`,             lastModified: LEGAL_DATE,   changeFrequency: "yearly",  priority: 0.3 },
   ];
 
   try {

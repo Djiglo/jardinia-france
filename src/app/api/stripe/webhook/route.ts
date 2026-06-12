@@ -7,7 +7,7 @@ import { generateOrderNumber } from "@/lib/utils";
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const sig = req.headers.get("stripe-signature") ?? "";
+  const sig  = req.headers.get("stripe-signature") ?? "";
 
   let event: Stripe.Event;
   try {
@@ -32,14 +32,22 @@ export async function POST(req: Request) {
 
 async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
   try {
-    // Expand product metadata to retrieve our productId and sku
+    // ─── Idempotence : ne pas créer la commande deux fois ──────────────────────
+    if (session.id) {
+      const existing = await prisma.order.findFirst({ where: { stripeSessionId: session.id } });
+      if (existing) {
+        console.log(`⚠️ Webhook dupliqué ignoré — commande ${existing.orderNumber} déjà créée`);
+        return;
+      }
+    }
+
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
       limit: 100,
       expand: ["data.price.product"],
     });
 
-    const address = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
-    const userId = session.metadata?.userId || null;
+    const address    = session.metadata?.address ? JSON.parse(session.metadata.address) : null;
+    const userId     = session.metadata?.userId   || null;
     const couponDbId = session.metadata?.couponDbId || null;
 
     const subtotal    = (session.amount_subtotal ?? 0) / 100;
@@ -47,39 +55,60 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
     const discount    = (session.total_details?.amount_discount ?? 0) / 100;
     const total       = (session.amount_total ?? 0) / 100;
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber:    generateOrderNumber(),
-        userId,
-        couponId:       couponDbId,
-        status:         "CONFIRMED",
-        paymentStatus:  "PAID",
-        paymentMethod:  "stripe",
-        stripeSessionId: session.id,
-        subtotal,
-        shippingCost,
-        discount,
-        total,
-        shippingAddress: address ?? {},
-        items: {
-          create: lineItems.data.map((item) => {
-            const product = item.price?.product as Stripe.Product | null;
-            const productId = product?.metadata?.productId ?? "";
-            const sku       = product?.metadata?.sku ?? "N/A";
-            const price     = (item.price?.unit_amount ?? 0) / 100;
-            return {
-              productId: productId || undefined as any,
-              name:      item.description ?? product?.name ?? "",
-              sku,
-              price,
-              quantity:  item.quantity ?? 1,
-              total:     price * (item.quantity ?? 1),
-            };
-          }).filter((i) => i.productId),
+    const orderItems = lineItems.data
+      .map((item) => {
+        const product   = item.price?.product as Stripe.Product | null;
+        const productId = product?.metadata?.productId ?? "";
+        const sku       = product?.metadata?.sku ?? "N/A";
+        const price     = (item.price?.unit_amount ?? 0) / 100;
+        return { productId: productId || undefined as any, name: item.description ?? product?.name ?? "", sku, price, quantity: item.quantity ?? 1, total: price * (item.quantity ?? 1) };
+      })
+      .filter((i) => i.productId);
+
+    // ─── Créer la commande + décrémenter stock + incrémenter coupon en 1 transaction ─
+    const order = await prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          orderNumber:     generateOrderNumber(),
+          userId,
+          couponId:        couponDbId,
+          status:          "CONFIRMED",
+          paymentStatus:   "PAID",
+          paymentMethod:   "stripe",
+          stripeSessionId: session.id,
+          subtotal,
+          shippingCost,
+          discount,
+          total,
+          shippingAddress: address ?? {},
+          items: { create: orderItems },
         },
-      },
+      });
+
+      // Décrémenter le stock — empêche les valeurs négatives
+      for (const item of lineItems.data) {
+        const product   = item.price?.product as Stripe.Product | null;
+        const productId = product?.metadata?.productId;
+        if (productId) {
+          await tx.product.updateMany({
+            where: { id: productId, stock: { gte: item.quantity ?? 1 } },
+            data:  { stock: { decrement: item.quantity ?? 1 } },
+          });
+        }
+      }
+
+      // Incrémenter l'utilisation du coupon
+      if (couponDbId) {
+        await tx.coupon.update({
+          where: { id: couponDbId },
+          data:  { usageCount: { increment: 1 } },
+        });
+      }
+
+      return created;
     });
 
+    // Email de confirmation (hors transaction — non bloquant)
     if (session.customer_email) {
       sendOrderConfirmationEmail({
         to:          session.customer_email,
@@ -94,28 +123,9 @@ async function handlePaymentSuccess(session: Stripe.Checkout.Session) {
       }).catch(console.error);
     }
 
-    // Mise à jour des stocks
-    for (const item of lineItems.data) {
-      const product = item.price?.product as Stripe.Product | null;
-      const productId = product?.metadata?.productId;
-      if (productId) {
-        await prisma.product.update({
-          where: { id: productId },
-          data: { stock: { decrement: item.quantity ?? 1 } },
-        }).catch(console.error);
-      }
-    }
-
-    // Increment coupon usage
-    if (couponDbId) {
-      await prisma.coupon.update({
-        where: { id: couponDbId },
-        data: { usageCount: { increment: 1 } },
-      }).catch(console.error);
-    }
-
-    console.log(`✅ Order ${order.orderNumber} created for ${session.customer_email}`);
+    console.log(`✅ Commande ${order.orderNumber} créée pour ${session.customer_email}`);
   } catch (error) {
-    console.error("Error handling payment success:", error);
+    console.error("Erreur traitement paiement:", error);
+    throw error; // Laisser Stripe ré-essayer si erreur non idempotente
   }
 }

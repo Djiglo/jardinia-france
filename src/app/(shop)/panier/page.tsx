@@ -50,7 +50,7 @@ export default function CartPage() {
     coupon
       ? coupon.type === "percentage"
         ? (subtotal * coupon.discount) / 100
-        : coupon.type === "free_shipping" ? 0 : coupon.discount
+        : coupon.type === "free_shipping" ? shippingCost : coupon.discount
       : 0;
 
   if (!mounted) {
@@ -156,9 +156,11 @@ export default function CartPage() {
                 <span>Sous-total</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              {discountAmount > 0 && (
+              {coupon && (
                 <div className="flex justify-between text-green-600 font-medium">
-                  <span>Réduction ({coupon?.code})</span>
+                  <span>
+                    {coupon.type === "free_shipping" ? "Livraison offerte" : `Réduction (${coupon.code})`}
+                  </span>
                   <span>-{formatPrice(discountAmount)}</span>
                 </div>
               )}
@@ -207,7 +209,7 @@ export default function CartPage() {
                 <div>
                   <span className="font-medium text-green-700">{coupon.code}</span>
                   <p className="text-xs text-green-600">
-                    {coupon.type === "percentage" ? `-${coupon.discount}%` : `-${formatPrice(coupon.discount)}`}
+                    {coupon.type === "free_shipping" ? "Livraison gratuite" : coupon.type === "percentage" ? `-${coupon.discount}%` : `-${formatPrice(coupon.discount)}`}
                   </p>
                 </div>
                 <button onClick={() => setCoupon(null)} className="text-gray-400 hover:text-red-500 text-xs" type="button">

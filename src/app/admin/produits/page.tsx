@@ -67,7 +67,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 
   const orderBy = SORT_MAP[sort] ? SORT_MAP[sort](order) : { createdAt: "desc" };
 
-  const [products, total, categories, statsRaw] = await Promise.all([
+  const [products, total, categories, totalAll, activeCount, outOfStockCount] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
@@ -81,13 +81,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
     }),
     prisma.product.count({ where }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.product.aggregate({
-      _count: { _all: true },
-      where: {},
-    }),
-  ]);
-
-  const [activeCount, outOfStockCount] = await Promise.all([
+    prisma.product.count(),
     prisma.product.count({ where: { isActive: true } }),
     prisma.product.count({ where: { stock: { lte: 0 } } }),
   ]);
@@ -115,9 +109,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Total produits" value={statsRaw._count._all} icon={<Package size={18} />} color="blue" />
+        <StatCard label="Total produits" value={totalAll} icon={<Package size={18} />} color="blue" />
         <StatCard label="Actifs" value={activeCount} icon={<CheckCircle size={18} />} color="green" />
-        <StatCard label="Inactifs" value={statsRaw._count._all - activeCount} icon={<XCircle size={18} />} color="gray" />
+        <StatCard label="Inactifs" value={totalAll - activeCount} icon={<XCircle size={18} />} color="gray" />
         <StatCard label="Rupture de stock" value={outOfStockCount} icon={<TrendingDown size={18} />} color="red" />
       </div>
 
