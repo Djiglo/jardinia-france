@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Save, ArrowLeft, ImageIcon } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft, ImageIcon, Check, X } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import Image from "next/image";
 
@@ -15,6 +15,13 @@ interface ProductFormProps {
   product?: any;
   categories: Category[];
   brands: Brand[];
+}
+
+interface NewBrandState {
+  open: boolean;
+  name: string;
+  loading: boolean;
+  error: string;
 }
 
 export default function ProductForm({ product, categories, brands }: ProductFormProps) {
@@ -51,6 +58,9 @@ export default function ProductForm({ product, categories, brands }: ProductForm
     product?.attributes ?? []
   );
 
+  const [localBrands, setLocalBrands] = useState<Brand[]>(brands);
+  const [newBrand, setNewBrand] = useState<NewBrandState>({ open: false, name: "", loading: false, error: "" });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -80,6 +90,28 @@ export default function ProductForm({ product, categories, brands }: ProductForm
 
   const toggle = (key: "isActive" | "isFeatured" | "isNew" | "isBestSeller") =>
     setForm((f) => ({ ...f, [key]: !f[key] }));
+
+  const createBrand = async () => {
+    if (!newBrand.name.trim()) return;
+    setNewBrand((b) => ({ ...b, loading: true, error: "" }));
+    try {
+      const res = await fetch("/api/admin/brands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newBrand.name.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setNewBrand((b) => ({ ...b, loading: false, error: data.error ?? "Erreur" }));
+        return;
+      }
+      setLocalBrands((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      setForm((f) => ({ ...f, brandId: data.id }));
+      setNewBrand({ open: false, name: "", loading: false, error: "" });
+    } catch {
+      setNewBrand((b) => ({ ...b, loading: false, error: "Erreur réseau" }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -320,11 +352,58 @@ export default function ProductForm({ product, categories, brands }: ProductForm
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Marque</label>
-                <select value={form.brandId} onChange={(e) => setForm((f) => ({ ...f, brandId: e.target.value }))} className={inp}>
-                  <option value="">Aucune marque</option>
-                  {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-gray-700">Marque</label>
+                  {!newBrand.open && (
+                    <button
+                      type="button"
+                      onClick={() => setNewBrand((b) => ({ ...b, open: true }))}
+                      className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1 font-medium"
+                    >
+                      <Plus size={12} /> Créer une marque
+                    </button>
+                  )}
+                </div>
+
+                {newBrand.open ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Nom de la marque (ex: Husqvarna)"
+                        value={newBrand.name}
+                        onChange={(e) => setNewBrand((b) => ({ ...b, name: e.target.value, error: "" }))}
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), createBrand())}
+                        className={`${inp} flex-1`}
+                      />
+                      <button
+                        type="button"
+                        onClick={createBrand}
+                        disabled={newBrand.loading || !newBrand.name.trim()}
+                        className="px-3 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <Check size={14} />
+                        {newBrand.loading ? "..." : "OK"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNewBrand({ open: false, name: "", loading: false, error: "" })}
+                        className="px-3 py-2 border border-gray-200 text-gray-500 rounded-xl text-sm hover:bg-gray-50"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    {newBrand.error && (
+                      <p className="text-xs text-red-600">{newBrand.error}</p>
+                    )}
+                  </div>
+                ) : (
+                  <select value={form.brandId} onChange={(e) => setForm((f) => ({ ...f, brandId: e.target.value }))} className={inp}>
+                    <option value="">Aucune marque</option>
+                    {localBrands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
