@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const slides = [
   {
     id: 1,
-    title: "Préparez votre été 2025",
+    title: "Préparez votre été 2026",
     subtitle: "Piscines & accessoires",
     description:
       "Profitez de -20% sur toute notre sélection de piscines hors-sol. Des modèles pour toutes les tailles de jardin.",
@@ -24,7 +24,7 @@ const slides = [
   {
     id: 2,
     title: "Mobilier de jardin premium",
-    subtitle: "Collections 2025 disponibles",
+    subtitle: "Collections 2026 disponibles",
     description:
       "Tables, chaises, salons de jardin... Créez l'espace extérieur de vos rêves avec nos collections sélectionnées.",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80",

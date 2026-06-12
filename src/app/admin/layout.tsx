@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf } from "lucide-react";
+import SignOutButton from "@/components/layout/SignOutButton";
 
 const NAV = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
@@ -52,13 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
             </div>
           </div>
-          <Link
-            href="/api/auth/signout"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white px-2 py-1.5 rounded transition-colors"
-          >
-            <LogOut size={15} />
-            Déconnexion
-          </Link>
+          <SignOutButton className="flex items-center gap-2 text-sm text-gray-400 hover:text-white px-2 py-1.5 rounded transition-colors" />
         </div>
       </aside>
 

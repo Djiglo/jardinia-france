@@ -23,7 +23,7 @@ export default function LivraisonPage() {
             <p className="text-2xl font-bold text-primary-600 mb-1">5,99 €</p>
             <p className="text-sm text-gray-500 mb-3">Gratuite dès 79 € d&apos;achats</p>
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock size={14} /> 5 à 7 jours ouvrés
+              <Clock size={14} /> 3 à 5 jours ouvrés
             </div>
           </div>
           <div className="border border-primary-200 bg-primary-50 rounded-2xl p-6">
@@ -31,7 +31,7 @@ export default function LivraisonPage() {
             <p className="text-2xl font-bold text-primary-600 mb-1">12,99 €</p>
             <p className="text-sm text-gray-500 mb-3">Pour recevoir votre commande rapidement</p>
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock size={14} /> 2 à 3 jours ouvrés
+              <Clock size={14} /> 1 à 2 jours ouvrés
             </div>
           </div>
         </div>

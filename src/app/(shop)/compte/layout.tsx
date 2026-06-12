@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { Package, Heart, MapPin, User, LogOut } from "lucide-react";
+import { Package, Heart, MapPin, User } from "lucide-react";
+import SignOutButton from "@/components/layout/SignOutButton";
 
 const navItems = [
   { href: "/compte",           label: "Tableau de bord", icon: User    },
@@ -42,12 +43,7 @@ export default async function CompteLayout({ children }: { children: React.React
                   {label}
                 </Link>
               ))}
-              <Link
-                href="/api/auth/signout"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors mt-2 pt-3 border-t border-gray-100"
-              >
-                <LogOut size={17} /> Déconnexion
-              </Link>
+              <SignOutButton className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors mt-2 pt-3 border-t border-gray-100 w-full text-left" />
             </nav>
           </div>
         </aside>
