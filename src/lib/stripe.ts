@@ -19,14 +19,14 @@ export const SHIPPING_RATES = {
   standard: {
     id: "standard",
     name: "Livraison standard",
-    description: "5-7 jours ouvrés",
+    description: "3-5 jours ouvrés",
     price: 5.99,
     freeFrom: 79,
   },
   express: {
     id: "express",
     name: "Livraison express",
-    description: "2-3 jours ouvrés",
+    description: "1-2 jours ouvrés",
     price: 12.99,
     freeFrom: null,
   },

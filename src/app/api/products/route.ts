@@ -81,6 +81,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
   }
 
+  if (!data.brandId) data.brandId = null;
   const slug = data.slug || slugify(data.name);
   const existing = await prisma.product.findFirst({ where: { OR: [{ slug }, { sku: data.sku }] } });
   if (existing) return NextResponse.json({ error: "Slug ou SKU déjà utilisé" }, { status: 409 });

@@ -17,11 +17,8 @@ interface ShopFiltersProps {
     maxPrice?: string;
     promo?: string;
     inStock?: string;
-    minRating?: string;
   };
 }
-
-const RATINGS = [5, 4, 3, 2, 1];
 
 export default function ShopFilters({ categories, brands, currentFilters }: ShopFiltersProps) {
   const router = useRouter();
@@ -33,7 +30,6 @@ export default function ShopFilters({ categories, brands, currentFilters }: Shop
     brands: true,
     promo: true,
     stock: true,
-    rating: false,
   });
 
   const [priceMin, setPriceMin] = useState(currentFilters.minPrice || "");
@@ -69,8 +65,7 @@ export default function ShopFilters({ categories, brands, currentFilters }: Shop
     currentFilters.minPrice ||
     currentFilters.maxPrice ||
     currentFilters.promo ||
-    currentFilters.inStock ||
-    currentFilters.minRating;
+    currentFilters.inStock;
 
   const applyPrice = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -248,34 +243,6 @@ export default function ShopFilters({ categories, brands, currentFilters }: Shop
         )}
       </div>
 
-      {/* Note */}
-      <div className="pb-4">
-        <button
-          onClick={() => toggle("rating")}
-          className="w-full flex items-center justify-between py-2 font-medium text-anthracite-700 hover:text-primary-600"
-        >
-          Note minimale
-          {openSections.rating ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        {openSections.rating && (
-          <div className="mt-2 space-y-1">
-            {RATINGS.map((r) => (
-              <button
-                key={r}
-                onClick={() => updateFilter("minRating", currentFilters.minRating === String(r) ? null : String(r))}
-                className={`w-full text-left px-2 py-1.5 rounded text-sm flex items-center gap-1 transition-colors ${
-                  currentFilters.minRating === String(r)
-                    ? "bg-primary-50 text-primary-600"
-                    : "hover:bg-gray-50 text-gray-600"
-                }`}
-              >
-                {"★".repeat(r)}{"☆".repeat(5 - r)}
-                <span className="ml-1">& plus</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 

@@ -41,7 +41,7 @@ export default function CheckoutPage() {
 
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
-  const shippingCost = subtotal >= 79 ? 0 : shippingMethod === "express" ? 12.99 : 5.99;
+  const shippingCost = shippingMethod === "express" ? 12.99 : subtotal >= 79 ? 0 : 5.99;
   const discountAmount = coupon
     ? coupon.type === "percentage" ? (subtotal * coupon.discount) / 100
     : coupon.type === "free_shipping" ? shippingCost : coupon.discount
@@ -221,7 +221,7 @@ export default function CheckoutPage() {
               <h2 className="font-semibold text-anthracite-800 text-lg mb-2">Mode de livraison</h2>
               {[
                 { id: "standard", label: "Livraison standard", delay: "3-5 jours ouvrés", price: subtotal >= 79 ? 0 : 5.99 },
-                { id: "express", label: "Livraison express", delay: "1-2 jours ouvrés", price: subtotal >= 79 ? 0 : 12.99 },
+                { id: "express", label: "Livraison express", delay: "1-2 jours ouvrés", price: 12.99 },
               ].map((method) => (
                 <label
                   key={method.id}

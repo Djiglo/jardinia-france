@@ -29,7 +29,12 @@ export default function CartPage() {
       });
       const data = await res.json();
       if (data.valid) {
-        setCoupon({ code: data.code, discount: data.discount, type: data.type });
+        const typeMap: Record<string, "percentage" | "fixed" | "free_shipping"> = {
+          PERCENTAGE: "percentage",
+          FIXED_AMOUNT: "fixed",
+          FREE_SHIPPING: "free_shipping",
+        };
+        setCoupon({ code: data.code, discount: data.discount, type: typeMap[data.type] ?? "fixed" });
         toast.success(`Code "${data.code}" appliqué !`);
       } else {
         toast.error(data.message ?? "Code invalide");

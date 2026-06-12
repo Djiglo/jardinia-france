@@ -34,6 +34,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const body = await req.json();
   const { images, attributes, ...data } = body;
 
+  if (!data.brandId) data.brandId = null;
   // Auto-slug si le nom change
   if (data.name && !data.slug) data.slug = slugify(data.name);
 
