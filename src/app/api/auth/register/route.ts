@@ -19,8 +19,12 @@ export async function POST(req: Request) {
     if (!name || !email || !password) {
       return NextResponse.json({ message: "Champs requis manquants" }, { status: 400 });
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ message: "Adresse e-mail invalide" }, { status: 400 });
+    }
     if (password.length < 8) {
-      return NextResponse.json({ message: "Mot de passe trop court" }, { status: 400 });
+      return NextResponse.json({ message: "Mot de passe trop court (8 caractères min.)" }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });

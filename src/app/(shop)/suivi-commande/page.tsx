@@ -116,6 +116,24 @@ export default function SuiviCommandePage() {
                   </div>
                 )}
 
+                {order.items && order.items.length > 0 && (
+                  <div className="mt-4 border-t border-gray-100 pt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Articles commandés</p>
+                    <div className="space-y-2">
+                      {order.items.map((item: any) => (
+                        <div key={item.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{item.productName} × {item.quantity}</span>
+                          <span className="font-medium text-anthracite-700">{Number(item.total).toFixed(2)} €</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between font-bold text-anthracite-800 border-t border-gray-100 mt-3 pt-3">
+                      <span>Total</span>
+                      <span>{Number(order.total).toFixed(2)} €</span>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm text-gray-500 mt-4">
                   Commande passée le{" "}
                   {new Date(order.createdAt).toLocaleDateString("fr-FR", {

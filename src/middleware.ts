@@ -25,6 +25,17 @@ export default auth((req) => {
     }
   }
 
+  // API admin — retourne 401/403 JSON (pas de redirect)
+  if (pathname.startsWith("/api/admin")) {
+    if (!isAuthenticated) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    if (!isAdmin)         return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+  }
+
+  // API compte — retourne 401 JSON
+  if (pathname.startsWith("/api/account")) {
+    if (!isAuthenticated) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+
   // Redirection si déjà connecté
   if ((pathname.startsWith("/auth/connexion") || pathname.startsWith("/auth/inscription")) && isAuthenticated) {
     return NextResponse.redirect(new URL("/compte", req.url));
@@ -34,5 +45,12 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/compte/:path*", "/admin/:path*", "/auth/connexion", "/auth/inscription"],
+  matcher: [
+    "/compte/:path*",
+    "/admin/:path*",
+    "/auth/connexion",
+    "/auth/inscription",
+    "/api/admin/:path*",
+    "/api/account/:path*",
+  ],
 };

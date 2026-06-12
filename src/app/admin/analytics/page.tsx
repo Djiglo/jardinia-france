@@ -73,7 +73,7 @@ async function getAnalytics() {
 
   const catMap: Record<string, number> = {};
   for (const item of categoryRevenue) {
-    const cat = products.find((p) => p.id === item.productId)?.category.name ?? "Autre";
+    const cat = products.find((p) => p.id === item.productId)?.category?.name ?? "Autre";
     catMap[cat] = (catMap[cat] ?? 0) + Number(item._sum.total ?? 0);
   }
   const topCategories = Object.entries(catMap)

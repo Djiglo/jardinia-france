@@ -2,6 +2,16 @@ import { prisma } from "@/lib/prisma";
 import ShopFilters from "@/components/shop/ShopFilters";
 import ShopHeader from "@/components/shop/ShopHeader";
 import ProductGrid from "@/components/shop/ProductGrid";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Boutique | Jardinia France",
+  description: "Découvrez toute notre gamme de produits pour aménager et entretenir votre jardin : piscines, pergolas, mobilier de jardin, barbecues, tondeuses et outils de jardin. Livraison gratuite dès 79 €.",
+  openGraph: {
+    title: "Boutique — Jardinia France",
+    description: "Tous nos produits jardin avec livraison gratuite dès 79 €.",
+  },
+};
 
 export default async function BoutiquePage({ searchParams }: any) {
   const sp = await searchParams;

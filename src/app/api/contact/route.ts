@@ -8,9 +8,14 @@ export async function POST(req: Request) {
     if (!name || !email || !message)
       return NextResponse.json({ error: "Champs requis" }, { status: 400 });
 
-    // Sauvegarder en BDD
+    const sanitize = (s: string) => String(s).replace(/[\r\n]/g, " ").trim();
+    const safeName    = sanitize(name);
+    const safeEmail   = sanitize(email);
+    const safeSubject = subject ? sanitize(subject) : "Sans sujet";
+
+    // Sauvegarder en BDD (avec valeurs sanitisées)
     await prisma.contactMessage.create({
-      data: { name, email, subject, message },
+      data: { name: safeName, email: safeEmail, subject: safeSubject, message },
     });
 
     // Notifier l'admin
@@ -24,8 +29,8 @@ export async function POST(req: Request) {
       await transporter.sendMail({
         from: `"Jardinia Contact" <${process.env.SMTP_FROM}>`,
         to: process.env.ADMIN_EMAIL,
-        subject: `[Contact] ${subject} — ${name}`,
-        text: `De : ${name} <${email}>\n\nSujet : ${subject}\n\n${message}`,
+        subject: `[Contact] ${safeSubject} — ${safeName}`,
+        text: `De : ${safeName} <${safeEmail}>\n\nSujet : ${safeSubject}\n\n${message}`,
       }).catch(console.error);
     }
 

@@ -24,6 +24,11 @@ export async function POST(req: Request) {
   if (!productId || !rating || !comment)
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
 
+  if (comment.length < 10 || comment.length > 2000)
+    return NextResponse.json({ error: "Le commentaire doit faire entre 10 et 2000 caractères" }, { status: 400 });
+  if (title && title.length > 200)
+    return NextResponse.json({ error: "Le titre est trop long (max 200 caractères)" }, { status: 400 });
+
   // Vérifier que l'utilisateur n'a pas déjà laissé un avis
   const existing = await prisma.review.findFirst({
     where: { productId, userId: session.user.id },

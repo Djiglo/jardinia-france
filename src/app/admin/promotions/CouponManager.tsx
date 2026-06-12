@@ -87,17 +87,23 @@ export default function CouponManager({ initial }: { initial: Coupon[] }) {
   };
 
   const toggleActive = async (c: Coupon) => {
-    await fetch(`/api/coupons/${c.id}`, {
+    const res = await fetch(`/api/coupons/${c.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...c, isActive: !c.isActive }),
+      body: JSON.stringify({
+        code: c.code, type: c.type, value: c.value,
+        minOrderAmount: c.minOrderAmount, maxDiscount: c.maxDiscount,
+        usageLimit: c.usageLimit, isActive: !c.isActive, expiresAt: c.expiresAt,
+      }),
     });
+    if (!res.ok) return;
     setCoupons((prev) => prev.map((x) => x.id === c.id ? { ...x, isActive: !x.isActive } : x));
   };
 
   const deleteCoupon = async (c: Coupon) => {
     if (!confirm(`Supprimer le code "${c.code}" ?`)) return;
-    await fetch(`/api/coupons/${c.id}`, { method: "DELETE" });
+    const res = await fetch(`/api/coupons/${c.id}`, { method: "DELETE" });
+    if (!res.ok) return;
     setCoupons((prev) => prev.filter((x) => x.id !== c.id));
   };
 

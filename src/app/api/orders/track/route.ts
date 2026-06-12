@@ -22,6 +22,9 @@ export async function GET(req: Request) {
       total: true,
       user: { select: { email: true } },
       shippingAddress: true,
+      items: {
+        select: { id: true, productName: true, quantity: true, unitPrice: true, total: true },
+      },
     },
   });
 

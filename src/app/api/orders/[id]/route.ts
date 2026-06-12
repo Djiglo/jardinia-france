@@ -35,14 +35,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
+  const VALID_STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
+
   const { id } = await params;
   const { status, trackingNumber, comment } = await req.json();
+
+  if (status && !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+  }
 
   const order = await prisma.order.update({
     where: { id },
     data: {
       ...(status && { status }),
-      ...(trackingNumber !== undefined && { trackingNumber }),
+      ...(trackingNumber !== undefined && { trackingNumber: trackingNumber || null }),
       ...(status && {
         history: {
           create: { status, comment: comment ?? null },

@@ -103,7 +103,7 @@ export async function sendOrderConfirmationEmail({
     </table>
     
     <div style="text-align:center;margin-top:32px;">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/compte/commandes" 
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/suivi-commande"
          style="background:${brandColor};color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
         Suivre ma commande
       </a>

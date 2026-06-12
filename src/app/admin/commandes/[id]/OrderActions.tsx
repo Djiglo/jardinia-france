@@ -42,7 +42,7 @@ export default function OrderActions({ orderId, currentStatus, trackingNumber: i
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status,
-          trackingNumber: tracking || undefined,
+          trackingNumber: tracking || null,
           comment:        comment  || undefined,
         }),
       });

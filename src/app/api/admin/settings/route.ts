@@ -20,10 +20,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
+  const ALLOWED_KEYS = new Set([
+    "siteName", "siteDescription", "contactEmail", "phoneNumber",
+    "address", "freeShippingThreshold", "standardShippingCost",
+    "expressShippingCost", "metaTitle", "metaDescription",
+    "facebookUrl", "instagramUrl", "twitterUrl", "youtubeUrl",
+    "maintenanceMode", "allowRegistrations", "analyticsId",
+  ]);
+
   const body: Record<string, string> = await req.json();
+  const allowed = Object.fromEntries(
+    Object.entries(body).filter(([k]) => ALLOWED_KEYS.has(k))
+  );
+
+  if (Object.keys(allowed).length === 0) {
+    return NextResponse.json({ error: "Aucune clé valide" }, { status: 400 });
+  }
 
   await Promise.all(
-    Object.entries(body).map(([key, value]) =>
+    Object.entries(allowed).map(([key, value]) =>
       prisma.siteSettings.upsert({
         where: { key },
         create: { key, value: String(value) },
