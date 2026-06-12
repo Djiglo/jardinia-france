@@ -57,7 +57,7 @@ export const metadata: Metadata = {
       "Spécialiste des produits de jardin et d'extérieur. Livraison dans toute l'Europe.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Jardinia France",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Jardinia France",
     description: "Tout pour profiter de votre extérieur",
-    images: ["/og-image.jpg"],
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
