@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf, BookOpen } from "lucide-react";
 import SignOutButton from "@/components/layout/SignOutButton";
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/promotions", label: "Promotions", icon: Tag },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/parametres", label: "Paramètres", icon: Settings },
+  { href: "/admin/guide", label: "Guide de démarrage", icon: BookOpen },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

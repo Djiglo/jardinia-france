@@ -2,9 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Edit, Package } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { Suspense } from "react";
 import ProductFilters from "./ProductFilters";
+import ProductActions from "./ProductActions";
 
 interface Props {
   searchParams: Promise<{ page?: string; category?: string; search?: string }>;
@@ -102,9 +103,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/produits/${product.id}`} className="p-1.5 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors inline-flex" title="Modifier">
-                      <Edit size={16} />
-                    </Link>
+                    <ProductActions productId={product.id} productName={product.name} />
                   </td>
                 </tr>
               ))}
