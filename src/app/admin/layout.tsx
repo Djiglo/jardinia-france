@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf, BookOpen } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3, Settings, Leaf, BookOpen, MessageSquare } from "lucide-react";
 import SignOutButton from "@/components/layout/SignOutButton";
 
 const NAV = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/admin/produits", label: "Produits", icon: Package },
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
+  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
   { href: "/admin/promotions", label: "Promotions", icon: Tag },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
