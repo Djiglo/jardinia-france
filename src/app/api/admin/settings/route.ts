@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
@@ -16,7 +16,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

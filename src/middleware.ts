@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!req.auth?.user;
-  const isAdmin = req.auth?.user?.role === "ADMIN";
+  const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(req.auth?.user?.role as string);
 
   // Routes protégées compte client
   if (pathname.startsWith("/compte") && !isAuthenticated) {

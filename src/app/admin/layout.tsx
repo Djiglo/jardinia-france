@@ -16,7 +16,7 @@ const NAV = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") redirect("/");
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) redirect("/");
 
   return (
     <div className="flex min-h-screen bg-gray-50">
