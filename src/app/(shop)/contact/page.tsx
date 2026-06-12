@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, Send, Check } from "lucide-react";
+import { Mail, MapPin, Clock, Send, Check } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function ContactPage() {
@@ -43,7 +43,6 @@ export default function ContactPage() {
         <div className="lg:col-span-2 space-y-5">
           {[
             { icon: Mail, title: "E-mail", value: "contact@jardinia-france.fr", href: "mailto:contact@jardinia-france.fr" },
-            { icon: Phone, title: "Téléphone", value: "+33 X XX XX XX XX", href: "tel:+33XXXXXXXXX" },
             { icon: MapPin, title: "Localisation", value: "Île-de-France, France" },
             { icon: Clock, title: "Horaires", value: "Lun–Ven 9h–18h" },
           ].map(({ icon: Icon, title, value, href }) => (
