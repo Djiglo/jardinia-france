@@ -25,6 +25,8 @@ export default async function FavorisPage() {
 
   const products = wishlist.map(({ product }) => ({
     ...product,
+    price: Number(product.price),
+    compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
     averageRating: product.reviews.length > 0
       ? product.reviews.reduce((a, r) => a + r.rating, 0) / product.reviews.length
       : null,

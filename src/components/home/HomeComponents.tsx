@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowRight, Star, Truck, ShieldCheck, RotateCcw, HeadphonesIcon, Tag, Zap, Gift } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import { prisma } from "@/lib/prisma";
+import { NewsletterForm } from "./NewsletterForm";
 
 // ========================
 // Best Sellers
@@ -382,22 +383,7 @@ export function Newsletter() {
             votre première commande.
           </p>
 
-          <form
-            action="/api/newsletter"
-            method="POST"
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-          >
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Votre adresse email"
-              className="flex-1 px-4 py-3 rounded-xl text-anthracite-900 bg-white focus:outline-none focus:ring-2 focus:ring-primary-300"
-            />
-            <button type="submit" className="btn-secondary shrink-0 font-semibold">
-              S'inscrire
-            </button>
-          </form>
+          <NewsletterForm />
           <p className="text-xs text-primary-300 mt-3">
             Pas de spam, désinscription en 1 clic. Conforme RGPD.
           </p>

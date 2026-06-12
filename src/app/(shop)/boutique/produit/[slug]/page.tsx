@@ -61,7 +61,12 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product.categoryId, product.id);
+  const relatedRaw = await getRelatedProducts(product.categoryId, product.id);
+  const related = relatedRaw.map((p) => ({
+    ...p,
+    price: Number(p.price),
+    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+  }));
 
   // Calcul note moyenne
   const avgRating =
@@ -71,7 +76,18 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <ProductPageClient
-      product={{ ...product, avgRating, reviewCount: product._count.reviews }}
+      product={{
+        ...product,
+        price: Number(product.price),
+        compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
+        variants: product.variants.map((v) => ({
+          ...v,
+          price: Number(v.price),
+          compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
+        })),
+        avgRating,
+        reviewCount: product._count.reviews,
+      }}
       relatedProducts={related}
     />
   );
