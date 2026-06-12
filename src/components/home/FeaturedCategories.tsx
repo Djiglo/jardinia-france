@@ -6,6 +6,8 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
+const FEATURED_SLUGS = ["piscines", "barbecues", "tondeuses-gazon", "mobilier-jardin", "outils-jardin", "pergolas"];
+
 const CATEGORY_IMAGES: Record<string, string> = {
   "piscines":        "https://i.ibb.co/WNjdyk4K/8057-011726583-3.jpg",
   "mobilier-jardin": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
@@ -16,11 +18,15 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 export async function FeaturedCategories() {
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
+  const rawCategories = await prisma.category.findMany({
+    where: { isActive: true, slug: { in: FEATURED_SLUGS } },
     include: { _count: { select: { products: { where: { isActive: true } } } } },
   });
+
+  // Respecte l'ordre défini dans FEATURED_SLUGS
+  const categories = FEATURED_SLUGS
+    .map((slug) => rawCategories.find((c) => c.slug === slug))
+    .filter(Boolean) as typeof rawCategories;
 
   return (
     <section className="py-16 bg-gray-50">
