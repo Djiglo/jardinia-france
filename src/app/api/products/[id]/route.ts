@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
@@ -82,6 +83,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       include: { images: true, attributes: true, category: true },
     });
 
+    // Invalidate homepage and product pages so changes appear immediately
+    revalidatePath("/");
+    revalidatePath("/boutique");
+    revalidatePath(`/boutique/produit/${product.slug}`);
+
     return NextResponse.json(product);
   } catch (error: any) {
     console.error("[PUT /api/products/:id]", error);
@@ -93,9 +99,20 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  try {
+    if (!await requireAdmin()) return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
 
-  const { id } = await params;
-  await prisma.product.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+    const { id } = await params;
+    const product = await prisma.product.findUnique({ where: { id }, select: { slug: true } });
+    await prisma.product.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidatePath("/boutique");
+    if (product?.slug) revalidatePath(`/boutique/produit/${product.slug}`);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("[DELETE /api/products/:id]", error);
+    return NextResponse.json({ error: error.message ?? "Erreur suppression" }, { status: 500 });
+  }
 }

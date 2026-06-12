@@ -13,6 +13,9 @@ import { Newsletter } from "@/components/home/Newsletter";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { QuickFAQ } from "@/components/home/QuickFAQ";
 
+// Revalidate homepage every 60 seconds so product changes appear quickly
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Jardinia France - Tout pour profiter de votre extérieur",
   description:

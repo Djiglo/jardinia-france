@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
@@ -117,6 +118,9 @@ export async function POST(req: Request) {
       },
       include: { images: true, attributes: true, category: true },
     });
+
+    revalidatePath("/");
+    revalidatePath("/boutique");
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
