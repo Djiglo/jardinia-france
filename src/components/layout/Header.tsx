@@ -18,7 +18,6 @@ import {
   Package,
   LogOut,
   Settings,
-  Phone,
   Mail,
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
@@ -129,15 +128,9 @@ export function Header() {
         <div className="container-custom flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <Phone size={12} />
-              <a href="tel:+33000000000" className="hover:text-primary-200">
-                À configurer
-              </a>
-            </span>
-            <span className="flex items-center gap-1">
               <Mail size={12} />
-              <a href="mailto:contact@jardinia-france.com" className="hover:text-primary-200">
-                contact@jardinia-france.com
+              <a href="mailto:contact@jardinia-france.fr" className="hover:text-primary-200">
+                contact@jardinia-france.fr
               </a>
             </span>
           </div>

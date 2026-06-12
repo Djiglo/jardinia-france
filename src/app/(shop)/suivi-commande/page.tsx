@@ -62,7 +62,7 @@ export default function SuiviCommandePage() {
               type="text"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
-              placeholder="ex: JRD-20250001"
+              placeholder="ex: JAR260612-12345"
               required
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
             />

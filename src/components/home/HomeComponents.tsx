@@ -263,7 +263,7 @@ const testimonials = [
     rating: 5,
     text: "Commande reçue en 4 jours, piscine montée en 2h. La qualité est au rendez-vous. Je recommande vivement Jardinia France !",
     product: "Piscine Intex Ultra XTR",
-    date: "Juin 2025",
+    date: "Juin 2026",
     avatar: "S",
   },
   {
@@ -272,7 +272,7 @@ const testimonials = [
     rating: 5,
     text: "Le barbecue Weber est superbe. Service client impeccable quand j'avais une question sur l'assemblage. Parfait !",
     product: "Weber Spirit E-315",
-    date: "Mai 2025",
+    date: "Mai 2026",
     avatar: "T",
   },
   {
@@ -281,7 +281,7 @@ const testimonials = [
     rating: 5,
     text: "Le salon de jardin est encore plus beau qu'en photos. La qualité de la résine tressée est vraiment premium. Ma terrasse est transformée !",
     product: "Salon résine tressée 6 places",
-    date: "Avril 2025",
+    date: "Avril 2026",
     avatar: "M",
   },
   {
@@ -290,7 +290,7 @@ const testimonials = [
     rating: 4,
     text: "Tondeuse robot livrée rapidement, fonctionne parfaitement. Je n'aurais jamais pensé gagner autant de temps. Top !",
     product: "Bosch Indego S+ 500",
-    date: "Mai 2025",
+    date: "Mai 2026",
     avatar: "P",
   },
 ];

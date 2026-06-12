@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Phone, Mail, Leaf, Users, Calendar, Globe, Send } from "lucide-react";
+import { Leaf, Users, Calendar, Globe } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "À propos de Jardinia France | Votre spécialiste jardin",

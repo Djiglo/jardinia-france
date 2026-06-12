@@ -10,7 +10,7 @@ interface Props {
 
 const DEFAULTS: Record<string, string> = {
   store_name: "Jardinia France",
-  store_email: "contact@jardinia.fr",
+  store_email: "contact@jardinia-france.fr",
   store_phone: "",
   shipping_cost: "4.99",
   shipping_free_threshold: "79",
@@ -69,7 +69,7 @@ export default function SettingsForm({ initial }: Props) {
         <h2 className="font-semibold text-anthracite-800 text-base border-b pb-3 border-gray-100">Informations boutique</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {field("store_name", "Nom de la boutique", "text", "Jardinia France")}
-          {field("store_email", "Email de contact", "email", "contact@jardinia.fr")}
+          {field("store_email", "Email de contact", "email", "contact@jardinia-france.fr")}
           {field("store_phone", "Téléphone", "tel", "+33 1 23 45 67 89")}
         </div>
       </section>

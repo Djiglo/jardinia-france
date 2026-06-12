@@ -9,7 +9,7 @@ export default function CGVPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <h1 className="text-3xl font-bold text-anthracite-900 mb-2">Conditions Générales de Vente</h1>
-      <p className="text-gray-500 mb-8">Dernière mise à jour : janvier 2025</p>
+      <p className="text-gray-500 mb-8">Dernière mise à jour : juin 2026</p>
       <div className="prose prose-gray max-w-none space-y-6">
         <section>
           <h2 className="text-xl font-semibold text-anthracite-800 mb-3">Article 1 — Objet</h2>

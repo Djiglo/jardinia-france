@@ -8,7 +8,6 @@ import {
   Youtube,
   Twitter,
   MapPin,
-  Phone,
   Mail,
   ShieldCheck,
   Truck,
@@ -124,42 +123,11 @@ export function Footer() {
 
             {/* Réseaux sociaux */}
             <div className="flex items-center gap-3">
-              <a
-                href="https://facebook.com/jardiniafrance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 bg-anthracite-800 hover:bg-primary-700 rounded-lg transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook size={18} />
-              </a>
-              <a
-                href="https://instagram.com/jardiniafrance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 bg-anthracite-800 hover:bg-primary-700 rounded-lg transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram size={18} />
-              </a>
-              <a
-                href="https://youtube.com/@jardiniafrance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 bg-anthracite-800 hover:bg-primary-700 rounded-lg transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube size={18} />
-              </a>
-              <a
-                href="https://twitter.com/jardiniafrance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 bg-anthracite-800 hover:bg-primary-700 rounded-lg transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter size={18} />
-              </a>
+              {/* Liens réseaux sociaux — à remplacer par les vraies URLs au lancement */}
+              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Facebook"><Facebook size={18} /></span>
+              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Instagram"><Instagram size={18} /></span>
+              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="YouTube"><Youtube size={18} /></span>
+              <span className="p-2 bg-anthracite-800 rounded-lg opacity-50 cursor-default" aria-label="Twitter/X"><Twitter size={18} /></span>
             </div>
 
             {/* Coordonnées */}
@@ -169,18 +137,12 @@ export function Footer() {
                 <span>Île-de-France, France</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Phone size={14} className="shrink-0" />
-                <a href="tel:+33000000000" className="hover:text-white transition-colors">
-                  À configurer
-                </a>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Mail size={14} className="shrink-0" />
                 <a
-                  href="mailto:contact@jardinia-france.com"
+                  href="mailto:contact@jardinia-france.fr"
                   className="hover:text-white transition-colors"
                 >
-                  contact@jardinia-france.com
+                  contact@jardinia-france.fr
                 </a>
               </div>
             </div>

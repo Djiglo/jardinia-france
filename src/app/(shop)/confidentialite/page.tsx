@@ -9,7 +9,7 @@ export default function ConfidentialitePage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold text-anthracite-900 mb-2">Politique de confidentialité</h1>
-      <p className="text-sm text-gray-400 mb-10">Dernière mise à jour : janvier 2025</p>
+      <p className="text-sm text-gray-400 mb-10">Dernière mise à jour : juin 2026</p>
 
       <div className="prose prose-gray max-w-none space-y-8">
         <section>
