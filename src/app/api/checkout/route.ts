@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    await auth();
+    const session = await auth();
     const { items, address, shippingMethod, coupon } = await req.json();
 
     if (!items?.length) {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { slugify } from "@/lib/utils";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -64,4 +66,45 @@ export async function GET(req: Request) {
   }));
 
   return NextResponse.json({ products: enriched, total, page, perPage, totalPages: Math.ceil(total / perPage) });
+}
+
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string)) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const { images = [], attributes = [], ...data } = body;
+
+  if (!data.name || !data.price || !data.categoryId || !data.sku) {
+    return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
+  }
+
+  const slug = data.slug || slugify(data.name);
+  const existing = await prisma.product.findFirst({ where: { OR: [{ slug }, { sku: data.sku }] } });
+  if (existing) return NextResponse.json({ error: "Slug ou SKU déjà utilisé" }, { status: 409 });
+
+  const product = await prisma.product.create({
+    data: {
+      ...data,
+      slug,
+      price: parseFloat(data.price),
+      compareAtPrice: data.compareAtPrice ? parseFloat(data.compareAtPrice) : null,
+      costPrice: data.costPrice ? parseFloat(data.costPrice) : null,
+      stock: parseInt(data.stock ?? "0"),
+      tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
+      images: {
+        create: images.map((url: string, i: number) => ({
+          url, sortOrder: i, isPrimary: i === 0,
+        })),
+      },
+      attributes: {
+        create: attributes.filter((a: any) => a.name && a.value),
+      },
+    },
+    include: { images: true, attributes: true, category: true },
+  });
+
+  return NextResponse.json(product, { status: 201 });
 }

@@ -25,7 +25,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       take: perPage,
       include: {
         category: true,
-        images: { take: 1, orderBy: { position: "asc" } },
+        images: { take: 1, orderBy: { sortOrder: "asc" } },
         _count: { select: { reviews: true } },
       },
     }),
