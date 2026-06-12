@@ -83,7 +83,6 @@ export default async function ProductPage({ params }: Props) {
         variants: product.variants.map((v) => ({
           ...v,
           price: Number(v.price),
-          compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
         })),
         avgRating,
         reviewCount: product._count.reviews,
