@@ -6,6 +6,7 @@ interface ShopHeaderProps {
   total: number;
   currentSort: string;
   searchQuery?: string;
+  categoryName?: string;
 }
 
 const SORT_OPTIONS = [
@@ -17,7 +18,7 @@ const SORT_OPTIONS = [
   { value: "name-asc", label: "Nom A→Z" },
 ];
 
-export default function ShopHeader({ total, currentSort, searchQuery }: ShopHeaderProps) {
+export default function ShopHeader({ total, currentSort, searchQuery, categoryName }: ShopHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -32,9 +33,9 @@ export default function ShopHeader({ total, currentSort, searchQuery }: ShopHead
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-200">
       <div>
-        <h1 className="text-xl font-semibold text-anthracite-800">
-          {searchQuery ? `Résultats pour "${searchQuery}"` : "Tous nos produits"}
-        </h1>
+        <h2 className="text-xl font-semibold text-anthracite-800">
+          {searchQuery ? `Résultats pour "${searchQuery}"` : categoryName ?? "Tous nos produits"}
+        </h2>
         <p className="text-sm text-gray-500 mt-0.5">
           {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
         </p>

@@ -68,10 +68,6 @@ export default async function CategoryPage({ params, searchParams }: any) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">
-        {cat.name}
-        {type && <span className="text-lg font-normal text-gray-500 ml-2 capitalize">— {type}</span>}
-      </h1>
       <div className="flex gap-8">
         <ShopFilters
           categories={categories}
@@ -79,7 +75,11 @@ export default async function CategoryPage({ params, searchParams }: any) {
           currentFilters={{ brand, minPrice, maxPrice, promo, inStock }}
         />
         <div className="flex-1 min-w-0">
-          <ShopHeader total={total} currentSort={sort} />
+          <ShopHeader
+            total={total}
+            currentSort={sort}
+            categoryName={type ? `${cat.name} — ${type}` : cat.name}
+          />
           <ProductGrid
             products={enriched}
             total={total}
