@@ -2,21 +2,24 @@
 // JARDINIA FRANCE - Layout Racine (app/layout.tsx)
 // ================================================
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { Providers } from "@/components/Providers";
 import "@/styles/globals.css";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-dm-sans",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const outfit = Outfit({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-playfair",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -89,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="fr" className={`${dmSans.variable} ${playfair.variable}`}>
       <head>
         {/* Structured Data - Organisation */}
         <script

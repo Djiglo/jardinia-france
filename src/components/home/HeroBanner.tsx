@@ -109,7 +109,7 @@ export function HeroBanner() {
             <p className="text-primary-300 font-medium text-lg mb-2 transition-all duration-500">
               {slide.subtitle}
             </p>
-            <h1 className="text-white font-heading font-bold text-4xl md:text-6xl leading-tight mb-4 text-balance">
+            <h1 className="text-white font-display font-bold text-4xl md:text-6xl leading-tight mb-4 text-balance">
               {slide.title}
             </h1>
             <p className="text-gray-200 text-lg mb-8 leading-relaxed max-w-xl">

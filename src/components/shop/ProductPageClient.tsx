@@ -4,7 +4,10 @@ import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronRight, Plus, Minus, Share2, Check } from "lucide-react";
+import {
+  ShoppingCart, Heart, Star, Truck, Shield, RotateCcw,
+  ChevronRight, Plus, Minus, Share2, Check, BadgeCheck,
+} from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
 import ProductCard from "@/components/shop/ProductCard";
@@ -20,12 +23,15 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQty] = useState(1);
-  const [activeTab, setActiveTab] = useState<"description" | "specs" | "reviews">("description");
+  const [activeTab, setActiveTab] = useState<"specs" | "reviews">("specs");
+  const [justAdded, setJustAdded] = useState(false);
+
   const { toggle: toggleWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
   const { data: session } = useSession();
+  const addItem = useCartStore((s) => s.addItem);
 
-  // Formulaire d'avis
+  // Review form
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: "", comment: "" });
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewDone, setReviewDone] = useState(false);
@@ -52,14 +58,12 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
       setReviewLoading(false);
     }
   }, [product.id, reviewForm]);
-  const [justAdded, setJustAdded] = useState(false);
-
-  const addItem = useCartStore((s) => s.addItem);
 
   const price = selectedVariant?.price ?? product.price;
   const compareAt = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
   const discount = getDiscountPercent(price, compareAt);
   const inStock = (selectedVariant?.stock ?? product.stock) > 0;
+  const stockQty = selectedVariant?.stock ?? product.stock;
 
   const handleAddToCart = () => {
     addItem(product, selectedVariant, quantity);
@@ -69,43 +73,48 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
   };
 
   const tabs = [
-    { key: "description", label: "Description" },
     { key: "specs", label: "Caractéristiques" },
-    { key: "reviews", label: `Avis (${product.reviewCount})` },
+    { key: "reviews", label: `Avis (${product.reviewCount ?? product.reviews?.length ?? 0})` },
   ] as const;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Fil d'ariane */}
-      <nav className="breadcrumb mb-6 text-sm text-gray-500 flex items-center gap-1">
-        <Link href="/" className="hover:text-primary-600">Accueil</Link>
-        <ChevronRight size={14} />
-        <Link href="/boutique" className="hover:text-primary-600">Boutique</Link>
-        <ChevronRight size={14} />
-        <Link href={`/boutique?category=${product.category.slug}`} className="hover:text-primary-600">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-8">
+        <Link href="/" className="hover:text-primary-600 transition-colors">Accueil</Link>
+        <ChevronRight size={12} />
+        <Link href="/boutique" className="hover:text-primary-600 transition-colors">Boutique</Link>
+        <ChevronRight size={12} />
+        <Link href={`/boutique/${product.category.slug}`} className="hover:text-primary-600 transition-colors">
           {product.category.name}
         </Link>
-        <ChevronRight size={14} />
-        <span className="text-anthracite-700">{product.name}</span>
+        <ChevronRight size={12} />
+        <span className="text-anthracite-600 font-medium truncate max-w-[200px]">{product.name}</span>
       </nav>
 
-      {/* Bloc principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
-        {/* Galerie */}
-        <div className="space-y-3">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+      {/* Main grid — image left, ALL info + description right */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-10 xl:gap-16 mb-16">
+
+        {/* ── Galerie ── */}
+        <div className="space-y-3 lg:sticky lg:top-24 lg:self-start">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
             <Image
               src={product.images[selectedImage]?.url ?? "/placeholder.svg"}
               alt={product.images[selectedImage]?.alt ?? product.name}
               fill
-              className="object-contain p-4"
+              className="object-contain p-6 transition-opacity duration-300"
               priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
             {discount && (
-              <span className="absolute top-3 left-3 badge badge-sale">-{discount}%</span>
+              <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                -{discount}%
+              </span>
             )}
             {product.isNew && !discount && (
-              <span className="absolute top-3 left-3 badge badge-new">Nouveau</span>
+              <span className="absolute top-4 left-4 bg-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                Nouveau
+              </span>
             )}
           </div>
           {product.images.length > 1 && (
@@ -114,9 +123,12 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(i)}
-                  className={`relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === i ? "border-primary-500" : "border-gray-200 hover:border-gray-300"
+                  className={`relative w-18 h-18 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                    selectedImage === i
+                      ? "border-primary-500 shadow-md scale-[1.04]"
+                      : "border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100"
                   }`}
+                  style={{ width: 72, height: 72 }}
                 >
                   <Image src={img.url} alt={img.alt ?? ""} fill className="object-cover" />
                 </button>
@@ -125,65 +137,78 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           )}
         </div>
 
-        {/* Infos produit */}
-        <div className="flex flex-col gap-4">
-          {/* Marque & titre */}
-          {product.brand && (
-            <span className="text-sm font-medium text-primary-600 uppercase tracking-wide">
-              {product.brand.name}
-            </span>
-          )}
-          <h1 className="text-2xl lg:text-3xl font-bold text-anthracite-900">{product.name}</h1>
+        {/* ── Colonne droite complète ── */}
+        <div className="flex flex-col gap-6">
 
-          {/* Note */}
-          {product.avgRating && (
-            <div className="flex items-center gap-2">
-              <div className="stars flex">
-                {[1,2,3,4,5].map((s) => (
-                  <Star key={s} size={16} className={s <= Math.round(product.avgRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
-                ))}
-              </div>
-              <span className="text-sm text-gray-500">
-                {product.avgRating.toFixed(1)} · {product.reviewCount} avis
+          {/* En-tête produit */}
+          <div>
+            {product.brand && (
+              <span className="inline-block text-xs font-semibold text-primary-600 uppercase tracking-widest mb-2">
+                {product.brand.name}
               </span>
-            </div>
-          )}
+            )}
+            <h1 className="font-display text-3xl lg:text-4xl font-bold text-anthracite-950 leading-tight mb-3">
+              {product.name}
+            </h1>
 
-          {/* Référence */}
-          <p className="text-xs text-gray-400">Réf. : {product.sku}</p>
+            {/* Note + ref */}
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              {(product.avgRating || product.averageRating) && (
+                <div className="flex items-center gap-1.5">
+                  <div className="flex">
+                    {[1,2,3,4,5].map((s) => (
+                      <Star key={s} size={14} className={
+                        s <= Math.round(product.avgRating ?? product.averageRating ?? 0)
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-gray-200 fill-gray-200"
+                      } />
+                    ))}
+                  </div>
+                  <span className="text-gray-500">
+                    {(product.avgRating ?? product.averageRating ?? 0).toFixed(1)}
+                    <span className="text-gray-400 ml-1">({product.reviewCount} avis)</span>
+                  </span>
+                </div>
+              )}
+              <span className="text-gray-300">·</span>
+              <span className="text-gray-400 text-xs">Réf. {product.sku}</span>
+            </div>
+          </div>
 
           {/* Prix */}
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-primary-600">{formatPrice(price)}</span>
+          <div className="flex items-baseline gap-3 pb-4 border-b border-gray-100">
+            <span className="font-display text-4xl font-bold text-primary-600">{formatPrice(price)}</span>
             {compareAt && (
-              <span className="text-lg text-gray-400 line-through">{formatPrice(compareAt)}</span>
-            )}
-            {discount && (
-              <span className="text-sm font-semibold text-red-500">Économisez {formatPrice(compareAt! - price)}</span>
+              <>
+                <span className="text-xl text-gray-400 line-through">{formatPrice(compareAt)}</span>
+                <span className="text-sm font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                  Économisez {formatPrice(compareAt - price)}
+                </span>
+              </>
             )}
           </div>
 
           {/* Description courte */}
           {product.shortDescription && (
-            <p className="text-gray-600 leading-relaxed">{product.shortDescription}</p>
+            <p className="text-gray-600 leading-relaxed text-[15px]">{product.shortDescription}</p>
           )}
 
           {/* Variantes */}
-          {product.variants.length > 0 && (
+          {product.variants?.length > 0 && (
             <div>
-              <p className="text-sm font-medium text-anthracite-700 mb-2">Variante :</p>
+              <p className="text-sm font-semibold text-anthracite-700 mb-2">Variante</p>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((v: any) => (
                   <button
                     key={v.id}
                     onClick={() => setSelectedVariant(v.id === selectedVariant?.id ? null : v)}
                     disabled={v.stock === 0}
-                    className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
                       v.stock === 0
-                        ? "opacity-40 cursor-not-allowed border-gray-200 text-gray-400"
+                        ? "opacity-35 cursor-not-allowed border-gray-200 text-gray-400"
                         : selectedVariant?.id === v.id
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
-                        : "border-gray-300 hover:border-primary-400 text-gray-700"
+                        ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm"
+                        : "border-gray-200 hover:border-primary-300 text-gray-700"
                     }`}
                   >
                     {v.name}
@@ -193,20 +218,20 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
             </div>
           )}
 
-          {/* Quantité & panier */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+          {/* Quantité + panier */}
+          <div className="flex items-stretch gap-3">
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
               <button
                 onClick={() => setQty(Math.max(1, quantity - 1))}
-                className="px-3 py-2 hover:bg-gray-50 transition-colors"
+                className="w-11 flex items-center justify-center hover:bg-gray-100 transition-colors h-full"
                 aria-label="Diminuer"
               >
                 <Minus size={16} />
               </button>
-              <span className="px-4 py-2 font-medium min-w-[3rem] text-center">{quantity}</span>
+              <span className="w-10 text-center font-semibold text-anthracite-900">{quantity}</span>
               <button
-                onClick={() => setQty(Math.min(selectedVariant?.stock ?? product.stock, quantity + 1))}
-                className="px-3 py-2 hover:bg-gray-50 transition-colors"
+                onClick={() => setQty(Math.min(stockQty, quantity + 1))}
+                className="w-11 flex items-center justify-center hover:bg-gray-100 transition-colors h-full"
                 aria-label="Augmenter"
               >
                 <Plus size={16} />
@@ -216,8 +241,12 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
             <button
               onClick={handleAddToCart}
               disabled={!inStock}
-              className={`btn-primary flex-1 flex items-center justify-center gap-2 py-3 ${
-                !inStock ? "opacity-50 cursor-not-allowed" : ""
+              className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm transition-all ${
+                !inStock
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : justAdded
+                  ? "bg-green-600 text-white"
+                  : "bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md active:scale-[0.98]"
               }`}
             >
               {justAdded ? (
@@ -229,8 +258,10 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
 
             <button
               onClick={() => toggleWishlist(product.id, product.name)}
-              className={`p-3 rounded-lg border transition-colors ${
-                inWishlist ? "border-red-300 bg-red-50 text-red-500" : "border-gray-200 hover:border-red-300 text-gray-500"
+              className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-all ${
+                inWishlist
+                  ? "border-red-300 bg-red-50 text-red-500"
+                  : "border-gray-200 hover:border-red-300 hover:text-red-400 text-gray-400"
               }`}
               aria-label={inWishlist ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
@@ -239,7 +270,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
 
             <button
               onClick={() => navigator.share?.({ title: product.name, url: window.location.href })}
-              className="p-3 rounded-lg border border-gray-200 hover:border-gray-300 text-gray-500 transition-colors"
+              className="w-12 h-12 rounded-xl border border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-all"
               aria-label="Partager"
             >
               <Share2 size={18} />
@@ -247,39 +278,53 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           </div>
 
           {/* Stock */}
-          <p className={`text-sm font-medium ${inStock ? "text-green-600" : "text-red-500"}`}>
-            {inStock ? `✓ En stock (${selectedVariant?.stock ?? product.stock} disponibles)` : "✗ Rupture de stock"}
+          <p className={`text-sm font-medium flex items-center gap-1.5 ${inStock ? "text-green-600" : "text-red-500"}`}>
+            {inStock ? (
+              <><BadgeCheck size={16} /> En stock — {stockQty} disponible{stockQty > 1 ? "s" : ""}</>
+            ) : (
+              "✗ Rupture de stock"
+            )}
           </p>
 
+          {/* ── Description complète ── (anciennement dans le tab) */}
+          {product.description && (
+            <div className="border-t border-gray-100 pt-6">
+              <h2 className="font-display text-lg font-semibold text-anthracite-900 mb-3">Description</h2>
+              <div
+                className="text-gray-600 text-[15px] leading-relaxed space-y-3 prose prose-sm prose-p:text-gray-600 prose-headings:text-anthracite-800 max-w-none"
+                dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, "<br/>") }}
+              />
+            </div>
+          )}
+
           {/* Garanties */}
-          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-gray-100">
-            <div className="flex flex-col items-center text-center gap-1">
-              <Truck size={20} className="text-primary-600" />
-              <span className="text-xs text-gray-500">Livraison gratuite dès 79€</span>
-            </div>
-            <div className="flex flex-col items-center text-center gap-1">
-              <Shield size={20} className="text-primary-600" />
-              <span className="text-xs text-gray-500">Paiement sécurisé</span>
-            </div>
-            <div className="flex flex-col items-center text-center gap-1">
-              <RotateCcw size={20} className="text-primary-600" />
-              <span className="text-xs text-gray-500">Retour sous 30 jours</span>
-            </div>
+          <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
+            {[
+              { icon: Truck, title: "Livraison gratuite", sub: "dès 79 € d'achat" },
+              { icon: Shield, title: "Paiement sécurisé", sub: "CB, Stripe, 3D Secure" },
+              { icon: RotateCcw, title: "Retour 30 jours", sub: "Remboursement garanti" },
+            ].map(({ icon: Icon, title, sub }) => (
+              <div key={title} className="flex flex-col items-center text-center gap-1 p-3 rounded-xl bg-gray-50">
+                <Icon size={20} className="text-primary-600 mb-0.5" />
+                <span className="text-xs font-semibold text-anthracite-700">{title}</span>
+                <span className="text-[11px] text-gray-400">{sub}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Tabs description / specs / avis */}
+      {/* ── Tabs : Caractéristiques + Avis (sous la grille) ── */}
       <div className="mb-16">
         <div className="flex border-b border-gray-200 mb-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-6 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              className={`px-6 py-3 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 activeTab === tab.key
                   ? "border-primary-600 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  : "border-transparent text-gray-400 hover:text-gray-600"
               }`}
             >
               {tab.label}
@@ -287,48 +332,43 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           ))}
         </div>
 
-        {activeTab === "description" && (
-          <div
-            className="prose prose-green max-w-none text-gray-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, "<br/>") }}
-          />
-        )}
-
         {activeTab === "specs" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
-            {product.attributes.map((attr: any) => (
-              <div key={attr.id} className="flex justify-between py-2.5 px-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-anthracite-700 text-sm">{attr.name}</span>
-                <span className="text-gray-600 text-sm">{attr.value}</span>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-w-2xl">
+            {product.attributes?.length > 0 ? (
+              product.attributes.map((attr: any) => (
+                <div key={attr.id} className="flex justify-between py-2.5 px-4 bg-gray-50 rounded-xl text-sm">
+                  <span className="font-medium text-anthracite-700">{attr.name}</span>
+                  <span className="text-gray-500">{attr.value}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm py-4">Aucune caractéristique renseignée.</p>
+            )}
           </div>
         )}
 
         {activeTab === "reviews" && (
           <div className="space-y-4 max-w-3xl">
-            {product.reviews.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>
+            {product.reviews?.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>
             ) : (
-              product.reviews.map((review: any) => (
-                <div key={review.id} className="card p-4">
+              product.reviews?.map((review: any) => (
+                <div key={review.id} className="p-5 border border-gray-100 rounded-2xl">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-medium text-anthracite-800">{review.user?.name ?? "Client vérifié"}</p>
-                      <div className="flex mt-0.5">
+                      <p className="font-semibold text-anthracite-800 text-sm">{review.user?.name ?? "Client vérifié"}</p>
+                      <div className="flex gap-0.5 mt-0.5">
                         {[1,2,3,4,5].map((s) => (
-                          <Star key={s} size={14} className={s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
+                          <Star key={s} size={13} className={s <= review.rating ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200"} />
                         ))}
                       </div>
                     </div>
-                    <span className="text-xs text-gray-400">
-                      {new Date(review.createdAt).toLocaleDateString("fr-FR")}
-                    </span>
+                    <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString("fr-FR")}</span>
                   </div>
-                  {review.title && <p className="font-medium text-sm mb-1">{review.title}</p>}
-                  <p className="text-gray-600 text-sm">{review.comment}</p>
+                  {review.title && <p className="font-semibold text-sm mb-1 text-anthracite-700">{review.title}</p>}
+                  <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
                   {review.isVerified && (
-                    <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-2">
+                    <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-2 font-medium">
                       <Check size={12} /> Achat vérifié
                     </span>
                   )}
@@ -336,12 +376,13 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
               ))
             )}
 
-            {/* Formulaire d'avis */}
-            <div className="mt-6 border-t border-gray-100 pt-6">
-              <h3 className="text-base font-semibold text-anthracite-800 mb-4">Laisser un avis</h3>
+            {/* Formulaire avis */}
+            <div className="mt-8 border-t border-gray-100 pt-6">
+              <h3 className="font-display text-base font-semibold text-anthracite-900 mb-4">Laisser un avis</h3>
               {!session?.user ? (
                 <p className="text-sm text-gray-500">
-                  <Link href="/auth/connexion" className="text-primary-600 hover:underline font-medium">Connectez-vous</Link> pour laisser un avis.
+                  <Link href="/auth/connexion" className="text-primary-600 hover:underline font-medium">Connectez-vous</Link>{" "}
+                  pour laisser un avis.
                 </p>
               ) : reviewDone ? (
                 <div className="flex items-center gap-2 p-4 bg-green-50 rounded-xl text-green-700 text-sm font-medium">
@@ -349,66 +390,29 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 </div>
               ) : (
                 <form onSubmit={submitReview} className="space-y-4">
-                  {/* Étoiles */}
                   <div>
-                    <p className="text-sm font-medium text-anthracite-700 mb-1.5">Note *</p>
+                    <p className="text-sm font-medium text-anthracite-700 mb-2">Note *</p>
                     <div className="flex gap-1">
                       {[1,2,3,4,5].map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}
-                          className="transition-transform hover:scale-110"
-                          aria-label={`${s} étoile${s > 1 ? "s" : ""}`}
-                        >
-                          <Star
-                            size={24}
-                            className={s <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 fill-gray-300"}
-                          />
+                        <button key={s} type="button" onClick={() => setReviewForm((f) => ({ ...f, rating: s }))} className="transition-transform hover:scale-110">
+                          <Star size={26} className={s <= reviewForm.rating ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200"} />
                         </button>
                       ))}
                     </div>
                   </div>
-
-                  {/* Titre */}
                   <div>
-                    <label className="text-sm font-medium text-anthracite-700 block mb-1">Titre (optionnel)</label>
-                    <input
-                      type="text"
-                      value={reviewForm.title}
-                      onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))}
-                      placeholder="Ex : Excellent produit !"
-                      className="input w-full"
-                      maxLength={120}
-                    />
+                    <label className="text-sm font-medium text-anthracite-700 block mb-1">Titre <span className="text-gray-400 font-normal">(optionnel)</span></label>
+                    <input type="text" value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} placeholder="Ex : Excellent produit !" className="input w-full" maxLength={120} />
                   </div>
-
-                  {/* Commentaire */}
                   <div>
                     <label className="text-sm font-medium text-anthracite-700 block mb-1">Commentaire *</label>
-                    <textarea
-                      value={reviewForm.comment}
-                      onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
-                      placeholder="Partagez votre expérience avec ce produit..."
-                      rows={4}
-                      required
-                      className="input w-full resize-none"
-                      maxLength={2000}
-                    />
+                    <textarea value={reviewForm.comment} onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))} placeholder="Partagez votre expérience…" rows={4} required className="input w-full resize-none" maxLength={2000} />
                   </div>
-
                   {reviewError && (
-                    <p className="text-sm text-red-600">
-                      {reviewError === "ALREADY_REVIEWED" ? "Vous avez déjà laissé un avis pour ce produit." : reviewError}
-                    </p>
+                    <p className="text-sm text-red-600">{reviewError === "ALREADY_REVIEWED" ? "Vous avez déjà laissé un avis pour ce produit." : reviewError}</p>
                   )}
-
-                  <button
-                    type="submit"
-                    disabled={reviewLoading || !reviewForm.comment.trim()}
-                    className="btn-primary px-6 py-2.5 disabled:opacity-50"
-                  >
-                    {reviewLoading ? "Envoi..." : "Publier mon avis"}
+                  <button type="submit" disabled={reviewLoading || !reviewForm.comment.trim()} className="btn-primary px-6 py-2.5 disabled:opacity-50">
+                    {reviewLoading ? "Envoi…" : "Publier mon avis"}
                   </button>
                 </form>
               )}
@@ -420,7 +424,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
       {/* Produits similaires */}
       {relatedProducts.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-anthracite-800 mb-6">Produits similaires</h2>
+          <h2 className="font-display text-2xl font-bold text-anthracite-900 mb-6">Vous aimerez aussi</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {relatedProducts.map((p: any) => (
               <ProductCard
@@ -428,7 +432,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 product={{
                   ...p,
                   averageRating: null,
-                  reviewCount: p._count.reviews,
+                  reviewCount: p._count?.reviews ?? 0,
                   compareAtPrice: p.compareAtPrice,
                 }}
               />
