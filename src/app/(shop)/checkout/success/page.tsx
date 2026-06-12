@@ -1,14 +1,23 @@
-import { Suspense } from "react";
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle, Package, Home } from "lucide-react";
+import { useCartStore } from "@/store/cart";
 
 export default function CheckoutSuccessPage() {
+  const clearCart = useCartStore((s) => s.clearCart);
+
+  useEffect(() => {
+    clearCart();
+  }, [clearCart]);
+
   return (
     <div className="container mx-auto px-4 py-20 text-center max-w-md">
       <div className="card p-10">
         <CheckCircle size={64} className="text-green-500 mx-auto mb-6" />
         <h1 className="text-2xl font-bold text-anthracite-800 mb-3">
-          Commande confirmée ! 🎉
+          Commande confirmée !
         </h1>
         <p className="text-gray-500 mb-2">
           Merci pour votre achat. Un e-mail de confirmation vous a été envoyé.
@@ -23,7 +32,7 @@ export default function CheckoutSuccessPage() {
           </Link>
           <Link href="/" className="btn-outline flex items-center justify-center gap-2">
             <Home size={18} />
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </div>
       </div>

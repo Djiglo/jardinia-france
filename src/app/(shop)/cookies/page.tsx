@@ -98,8 +98,8 @@ export default function CookiesPage() {
           <h2 className="text-xl font-semibold text-anthracite-800 mb-3">Contact</h2>
           <p className="text-gray-700">
             Pour toute question sur notre utilisation des cookies, contactez-nous à{" "}
-            <a href="mailto:contact@jardinia-france.com" className="text-primary-600 hover:underline">
-              contact@jardinia-france.com
+            <a href="mailto:contact@jardinia-france.fr" className="text-primary-600 hover:underline">
+              contact@jardinia-france.fr
             </a>.
           </p>
         </section>
