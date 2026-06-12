@@ -80,6 +80,9 @@ export default async function BoutiquePage({ searchParams }: any) {
             page={currentPage}
             perPage={perPage}
             basePath="/boutique"
+            searchParamsStr={new URLSearchParams(
+              Object.fromEntries(Object.entries(sp).filter(([, v]) => v !== undefined)) as Record<string, string>
+            ).toString()}
           />
         </div>
       </div>

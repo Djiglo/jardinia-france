@@ -9,6 +9,7 @@ interface ProductGridProps {
   page: number;
   perPage: number;
   basePath?: string;
+  searchParamsStr?: string;
 }
 
 export default function ProductGrid({
@@ -17,17 +18,14 @@ export default function ProductGrid({
   page,
   perPage,
   basePath = "/boutique",
+  searchParamsStr = "",
 }: ProductGridProps) {
   const totalPages = Math.ceil(total / perPage);
 
   const buildPageUrl = (p: number) => {
-    // Preserve current search params and update page
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      params.set("page", String(p));
-      return `${basePath}?${params.toString()}`;
-    }
-    return `${basePath}?page=${p}`;
+    const params = new URLSearchParams(searchParamsStr);
+    params.set("page", String(p));
+    return `${basePath}?${params.toString()}`;
   };
 
   if (products.length === 0) {

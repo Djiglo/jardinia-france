@@ -81,6 +81,9 @@ export default async function CategoryPage({ params, searchParams }: any) {
             page={currentPage}
             perPage={perPage}
             basePath={`/boutique/${category}`}
+            searchParamsStr={new URLSearchParams(
+              Object.fromEntries(Object.entries(resolvedSearch).filter(([, v]) => v !== undefined)) as Record<string, string>
+            ).toString()}
           />
         </div>
       </div>

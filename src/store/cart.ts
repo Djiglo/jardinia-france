@@ -65,7 +65,7 @@ export const useCartStore = create<CartStore>()(
         return get().items.reduce((acc, item) => {
           const price =
             item.variant?.price !== null && item.variant?.price !== undefined
-              ? item.product.price + item.variant.price
+              ? item.variant.price
               : item.product.price;
           return acc + price * item.quantity;
         }, 0);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ChevronDown, ChevronUp, X, SlidersHorizontal } from "lucide-react";
 
 interface Category { id: string; name: string; slug: string; _count: { products: number } }
@@ -23,6 +23,7 @@ interface ShopFiltersProps {
 export default function ShopFilters({ categories, brands, currentFilters }: ShopFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [openSections, setOpenSections] = useState({
     categories: true,
@@ -48,15 +49,15 @@ export default function ShopFilters({ categories, brands, currentFilters }: Shop
       } else {
         params.set(key, value);
       }
-      router.push(`/boutique?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`);
     },
-    [router, searchParams]
+    [router, searchParams, pathname]
   );
 
   const clearAll = () => {
     setPriceMin("");
     setPriceMax("");
-    router.push("/boutique");
+    router.push(pathname);
   };
 
   const hasFilters =
@@ -72,7 +73,7 @@ export default function ShopFilters({ categories, brands, currentFilters }: Shop
     params.delete("page");
     if (priceMin) params.set("minPrice", priceMin); else params.delete("minPrice");
     if (priceMax) params.set("maxPrice", priceMax); else params.delete("maxPrice");
-    router.push(`/boutique?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const FilterContent = () => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface ShopHeaderProps {
   total: number;
@@ -20,12 +20,13 @@ const SORT_OPTIONS = [
 export default function ShopHeader({ total, currentSort, searchQuery }: ShopHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const handleSort = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", value);
     params.delete("page");
-    router.push(`/boutique?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
